@@ -4,16 +4,23 @@ import Euterpea.Music.Note.Music
 import Euterpea.Music.Note.MoreMusic
 import Euterpea.Music.Note.Performance
 import Euterpea.IO.MIDI.ToMidi
+import Interval
 
 twice :: Music a -> Music a
 twice m = timesM 2 m
 
-part1 = twice (twice (d 4 en) :+: twice (g 4 qn))
-part2 = twice (twice (a 4 en) :+: twice (b 4 qn))
-part3 = twice (twice (d 5 qn) :+: qnr)
-part4 = twice (d 5 en :+: c 5 en :+: twice (b 4 qn))
+part1 = twice (v (-1) en) :+: twice (i 0 qn)
+part2 = twice (ii 0 en) :+: twice (iii 0 qn)
+part3 = twice (v 0 qn) :+: rest qn
+part4 = v 0 en :+: iv 0 en :+: twice (iii 0 qn)
 
-theme = part1 :+: part2 :+: part3 :+: part4
+theme = {-twice $-} twice part1 :+: twice part2 :+: twice part3 :+: twice part4
+
+intoKey = mIntToPitch G Major 4
+
+londonsBurning = instrument MusicBox $
+	intoKey theme
+	:=: delayM (6/4) (intoKey (mTranspose theme (-3)))
 
 main :: IO ()
-main = play theme
+main = play londonsBurning
