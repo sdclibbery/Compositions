@@ -21,13 +21,15 @@ intoKey = mIntToPitch G Major 4
 
 music = instrument MusicBox $
   intoKey subject
-  :=: delayM (6/4) (intoKey $ mTranspose subject (2))
+  :=: delayM (6/4) (intoKey $ mTranspose subject (4))
 --  :=: delayM (12/4) (intoKey $ mTranspose subject (5))
 --  :=: delayM (6/4) (intoKey $ mTranspose subject (0))
 
 rythm = instrument Percussion $ takeM (8*3/4) $ repeatM $ (perc BassDrum1 qn) :+: twice (perc ClosedHiHat qn)
 
 londonsBurning = music :=: rythm
+
+-- !!! Next: Write an autocorrelator that tries a subject against all correlations
 
 main :: IO ()
 main = do
