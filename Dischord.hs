@@ -1,7 +1,12 @@
 -- Dischordance analysis for music
 -- Find semitone, tone and diminished discordances within Music
 
-module Analysis.Dischord (Dischord, DischordInterval, findDischords, findDischordsM) where
+{-
+ToDo:
+* Test Suite!
+-}
+
+module Dischord (Dischord, DischordInterval, findDischords, findDischordsM) where
 import Euterpea.Music.Note.Music
 import Euterpea.Music.Note.MoreMusic
 import Euterpea.Music.Note.Performance
