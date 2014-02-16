@@ -2,7 +2,6 @@
 
 {-
 TODO:
-* Switch to a proper UT framework
 * Minor scale diatoneToPitch is not right because it only converts via AbsPitch and that is wrong :-/ See commented test...
 * Should really have mPitchToDiatone here too to complement mDiatoneToPitch :-)
 -}

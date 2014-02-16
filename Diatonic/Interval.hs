@@ -1,12 +1,9 @@
 -- Interval based music: easy to transpose within a key
 
 {- ToDo:
-
-* Switch to a proper UT framework
 * Try switching from enum to Int for Delta type...
 * pitchInterval..? Would need a keysigf too..??
 -> Then look at implementing analysis for diatonic laws of melody and harmony
-
 -}
 
 module Diatonic.Interval where

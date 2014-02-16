@@ -1,8 +1,9 @@
-import Diatonic.DiatoneTests as DiatoneTests
-import Diatonic.IntervalTests as IntervalTests
-
--- Run all Diatonic test suites
+import Test.HUnit
+import qualified Diatonic.DiatoneTests
+import qualified Diatonic.IntervalTests
 
 main = do
-	DiatoneTests.run
-	IntervalTests.run
+	runTestTT $ TestList
+		[ Diatonic.DiatoneTests.tests
+		, Diatonic.IntervalTests.tests
+		]

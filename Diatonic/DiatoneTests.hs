@@ -2,37 +2,28 @@ module Diatonic.DiatoneTests where
 import Diatonic.Diatone
 import Euterpea.Music.Note.Music
 import Euterpea.Music.Note.MoreMusic
+import Test.HUnit
 
-assert msg True = return ()
-assert msg False = do print $ msg ++ " failed!"
+tests = TestLabel "Diatone" $ TestList
+	[ testDiatoneToPitch
+	, testTransposeDiatone
+	]
 
-testDiatoneToPitch = do
-	test C Major 4 (Tonic, 0) (C, 4)
-	test C Major 4 (Mediant, 0) (E, 4)
-	test A Minor 4 (Mediant, 0) (C, 5)
---	test C Minor 4 (Mediant, 0) (Ef, 4)
-	where
-		test pc m o d e = assert ("diatoneToPitch"++msg) $ e == actual
-			where
-				actual = diatoneToPitch pc m o d
-				msg = ". expected: " ++ (show e) ++ ". actual: " ++ (show actual) ++ ". inputs: " ++ (show (pc, m, o, d))
+testDiatoneToPitch = TestLabel "diatoneToPitch" $ TestList
+				[ test (C,4)	C Major 4 (Tonic, 0)
+				, test (E,4)	C Major 4 (Mediant, 0)
+				, test (C,5)	A Minor 4 (Mediant, 0)
+--				, test (Ef,4)	C Minor 4 (Mediant, 0)
+				] where
+					test e pc mo o d = (show pc ++ show mo ++ show d) ~: e ~=? diatoneToPitch pc mo o d
 
-testTransposeDiatone = do
-	test 0 (Tonic, 0) (Tonic, 0)
-	test 1 (Tonic, 0) (SuperTonic, 0)
-	test 2 (Tonic, 0) (Mediant, 0)
-	test 7 (Tonic, 0) (Tonic, 1)
-	test 1 (Mediant, 0) (SubDominant, 0)
-	test 1 (LeadingNote, 0) (Tonic, 1)
-	test (-1) (Tonic, 0) (LeadingNote, -1)
-	where
-		test o d e = assert ("transposeDiatone"++msg) $ e == actual
-			where
-				actual = transposeDiatone o d
-				msg = ". expected: " ++ (show e) ++ ". actual: " ++ (show actual) ++ ". inputs: " ++ (show (o, d))
-
-run = do
-	print "Diatone Tests Start"
-	testDiatoneToPitch
-	testTransposeDiatone
-	print "Diatone Tests Done!"
+testTransposeDiatone = TestLabel "transposeDiatone" $ TestList
+				[ test (Tonic, 0)			0 (Tonic, 0)
+				, test (SuperTonic, 0)		1 (Tonic, 0)
+				, test (Mediant, 0)			2 (Tonic, 0)
+				, test (Tonic, 1)			7 (Tonic, 0)
+				, test (SubDominant, 0)		1 (Mediant, 0)
+				, test (Tonic, 1)			1 (LeadingNote, 0)
+				, test (LeadingNote, -1)	(-1) (Tonic, 0)
+				] where
+					test e o d = (show o ++ show d) ~: e ~=? transposeDiatone o d
