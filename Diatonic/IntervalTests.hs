@@ -10,6 +10,7 @@ tests = TestLabel "Interval" $ TestList
 	, testInvert
 	, testDiatonicIntervalMajor
 	, testDiatonicIntervalMinor
+	, testPitchIntervalMinor
 	]
 
 testIsValid = TestLabel "isValid" $ TestList
@@ -73,3 +74,18 @@ testDiatonicIntervalMinor = TestLabel "diatonicInterval Minor" $ TestList
 	]
 	where
 		test e d1 d2 = show d1 ++ show d2 ~: e ~=? diatonicInterval Music.Minor d1 d2
+
+testPitchIntervalMinor = TestLabel "pitchInterval Minor" $ TestList
+	[ test (MkInterval Perfect Unison)		(Music.C, 4) (Music.C, 4)
+	, test (MkInterval Minor Third)			(Music.C, 4) (Music.Ef, 4)
+	, test (MkInterval Major Third)			(Music.C, 4) (Music.E, 4)
+	, test (MkInterval Perfect Fifth)		(Music.C, 4) (Music.G, 4)
+	, test (MkInterval Perfect Octave)		(Music.C, 4) (Music.C, 5)
+	, test (MkInterval Perfect Octave)		(Music.C, 5) (Music.C, 4)
+	, test (MkInterval Major Ninth)			(Music.C, 4) (Music.D, 5)
+	, test (MkInterval Minor Third)			(Music.C, 4) (Music.Ef, 5)
+	, test (MkInterval Perfect Eleventh)	(Music.C, 4) (Music.F, 5)
+	, test (MkInterval Minor Thirteenth)	(Music.C, 4) (Music.Af, 5)
+	]
+	where
+		test e p1 p2 = show p1 ++ show p2 ~: e ~=? pitchInterval p1 p2
