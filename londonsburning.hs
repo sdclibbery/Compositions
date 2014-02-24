@@ -4,7 +4,8 @@ import Euterpea.Music.Note.Music
 import Euterpea.Music.Note.MoreMusic
 import Euterpea.Music.Note.Performance
 import Euterpea.IO.MIDI.ToMidi
-import Diatone
+import Diatonic.Diatone
+import Diatonic.Analysis.Melody
 import Dischord
 
 twice :: Music a -> Music a
@@ -33,5 +34,6 @@ londonsBurning = music :=: rythm
 
 main :: IO ()
 main = do
-  print $ findDischordsM londonsBurning
+  print $ analyseMelody $ intoKey subject
+--  print $ findDischordsM londonsBurning
 --  play londonsBurning

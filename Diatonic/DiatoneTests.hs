@@ -6,8 +6,18 @@ import Test.HUnit
 
 tests = TestLabel "Diatone" $ TestList
 	[ testDiatoneToPitch
+	, testDiatoneToChromaticDelta
 	, testTransposeDiatone
 	]
+
+testDiatoneToChromaticDelta = TestLabel "diatoneToChromaticDelta" $ TestList
+				[ test 0		Major (Tonic, 0)
+				, test 12		Major (Tonic, 1)
+				, test 2		Major (SuperTonic, 0)
+				, test 4		Major (Mediant, 0)
+				, test 3		Minor (Mediant, 0)
+				] where
+					test e mo d = (show mo ++ show d) ~: e ~=? diatoneToChromaticDelta mo d
 
 testDiatoneToPitch = TestLabel "diatoneToPitch" $ TestList
 				[ test (C,4)	C Major 4 (Tonic, 0)

@@ -11,6 +11,7 @@ tests = TestLabel "Interval" $ TestList
 	, testDiatonicIntervalMajor
 	, testDiatonicIntervalMinor
 	, testPitchIntervalMinor
+	, testResolve
 	]
 
 testIsValid = TestLabel "isValid" $ TestList
@@ -50,6 +51,7 @@ testInvert = TestLabel "invert" $ TestList
 testDiatonicIntervalMajor = TestLabel "diatonicInterval Major" $ TestList
 	[ test (MkInterval Perfect Unison)		(Tonic, 4) (Tonic, 4)
 	, test (MkInterval Major Third)			(Tonic, 4) (Mediant, 4)
+	, test (MkInterval Major Third)			(Mediant, 4) (Tonic, 4)
 	, test (MkInterval Perfect Fifth)		(Tonic, 4) (Dominant, 4)
 	, test (MkInterval Perfect Octave)		(Tonic, 4) (Tonic, 5)
 	, test (MkInterval Perfect Octave)		(Tonic, 5) (Tonic, 4)
@@ -64,6 +66,7 @@ testDiatonicIntervalMajor = TestLabel "diatonicInterval Major" $ TestList
 testDiatonicIntervalMinor = TestLabel "diatonicInterval Minor" $ TestList
 	[ test (MkInterval Perfect Unison)		(Tonic, 4) (Tonic, 4)
 	, test (MkInterval Minor Third)			(Tonic, 4) (Mediant, 4)
+	, test (MkInterval Minor Third)			(Mediant, 4) (Tonic, 4)
 	, test (MkInterval Perfect Fifth)		(Tonic, 4) (Dominant, 4)
 	, test (MkInterval Perfect Octave)		(Tonic, 4) (Tonic, 5)
 	, test (MkInterval Perfect Octave)		(Tonic, 5) (Tonic, 4)
@@ -79,6 +82,7 @@ testPitchIntervalMinor = TestLabel "pitchInterval Minor" $ TestList
 	[ test (MkInterval Perfect Unison)		(Music.C, 4) (Music.C, 4)
 	, test (MkInterval Minor Third)			(Music.C, 4) (Music.Ef, 4)
 	, test (MkInterval Major Third)			(Music.C, 4) (Music.E, 4)
+	, test (MkInterval Major Third)			(Music.E, 4) (Music.C, 4)
 	, test (MkInterval Perfect Fifth)		(Music.C, 4) (Music.G, 4)
 	, test (MkInterval Perfect Octave)		(Music.C, 4) (Music.C, 5)
 	, test (MkInterval Perfect Octave)		(Music.C, 5) (Music.C, 4)
@@ -86,6 +90,15 @@ testPitchIntervalMinor = TestLabel "pitchInterval Minor" $ TestList
 	, test (MkInterval Minor Third)			(Music.C, 4) (Music.Ef, 5)
 	, test (MkInterval Perfect Eleventh)	(Music.C, 4) (Music.F, 5)
 	, test (MkInterval Minor Thirteenth)	(Music.C, 4) (Music.Af, 5)
+	, test (MkInterval Minor Second)		(Music.B, 3) (Music.C, 4)
+	, test (MkInterval Minor Second)		(Music.C, 4) (Music.B, 3)
 	]
 	where
 		test e p1 p2 = show p1 ++ show p2 ~: e ~=? pitchInterval p1 p2
+
+testResolve = TestLabel "resolve" $ TestList
+	[ test (1, MkInterval Major Third)		(MkInterval Diminished Fifth)
+	-- Needs to handle more cases :-)
+	]
+	where
+		test e i = show i ~: e ~=? resolve i

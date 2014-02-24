@@ -23,24 +23,24 @@ v octave dur = note dur $ (Dominant, octave)
 vi octave dur = note dur $ (SubMediant, octave)
 vii octave dur = note dur $ (LeadingNote, octave)
 
-diatoneToAbsPitch :: Mode -> Degree -> AbsPitch
-diatoneToAbsPitch Major Tonic = 0
-diatoneToAbsPitch Major SuperTonic = 2
-diatoneToAbsPitch Major Mediant = 4
-diatoneToAbsPitch Major SubDominant = 5
-diatoneToAbsPitch Major Dominant = 7
-diatoneToAbsPitch Major SubMediant = 9
-diatoneToAbsPitch Major LeadingNote = 11
-diatoneToAbsPitch Minor Tonic = 0
-diatoneToAbsPitch Minor SuperTonic = 2
-diatoneToAbsPitch Minor Mediant = 3
-diatoneToAbsPitch Minor SubDominant = 5
-diatoneToAbsPitch Minor Dominant = 7
-diatoneToAbsPitch Minor SubMediant = 8
-diatoneToAbsPitch Minor LeadingNote = 10
+diatoneToChromaticDelta :: Mode -> Diatone -> AbsPitch
+diatoneToChromaticDelta Major (Tonic, o) = 0 + o*12
+diatoneToChromaticDelta Major (SuperTonic, o) = 2 + o*12
+diatoneToChromaticDelta Major (Mediant, o) = 4 + o*12
+diatoneToChromaticDelta Major (SubDominant, o) = 5 + o*12
+diatoneToChromaticDelta Major (Dominant, o) = 7 + o*12
+diatoneToChromaticDelta Major (SubMediant, o) = 9 + o*12
+diatoneToChromaticDelta Major (LeadingNote, o) = 11 + o*12
+diatoneToChromaticDelta Minor (Tonic, o) = 0 + o*12
+diatoneToChromaticDelta Minor (SuperTonic, o) = 2 + o*12
+diatoneToChromaticDelta Minor (Mediant, o) = 3 + o*12
+diatoneToChromaticDelta Minor (SubDominant, o) = 5 + o*12
+diatoneToChromaticDelta Minor (Dominant, o) = 7 + o*12
+diatoneToChromaticDelta Minor (SubMediant, o) = 8 + o*12
+diatoneToChromaticDelta Minor (LeadingNote, o) = 10 + o*12
 
 diatoneToPitch :: PitchClass -> Mode -> Octave -> Diatone -> Pitch
-diatoneToPitch pc mode baseOct (deg, octave) = pitch $ (pcToInt pc) + (baseOct+octave)*12 + (diatoneToAbsPitch mode deg)
+diatoneToPitch pc mode baseOct (deg, octave) = pitch $ (pcToInt pc) + (baseOct+octave)*12 + (diatoneToChromaticDelta mode (deg, 0))
 
 mDiatoneToPitch :: PitchClass -> Mode -> Octave -> Music Diatone -> Music Pitch
 mDiatoneToPitch pc mode octave m = mMap (diatoneToPitch pc mode octave) m

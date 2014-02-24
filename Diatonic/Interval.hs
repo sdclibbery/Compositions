@@ -8,7 +8,7 @@ data Interval = MkInterval { intType :: Type, intDelta :: Delta } deriving (Eq, 
 data Type = Perfect | Major | Minor | Diminished | Augmented deriving (Eq, Ord, Show, Enum, Bounded)
 data Delta = Unison | Second | Third | Fourth | Fifth | Sixth | Seventh | Octave | Ninth | Eleventh | Thirteenth deriving (Eq, Ord, Show, Enum, Bounded)
 
-data Info = MkInfo { infoChromatic :: Int, infoDiatonic :: Int } deriving (Eq, Ord, Show)
+data Info = MkInfo { infoDiatonic :: Int, infoChromatic :: Int } deriving (Eq, Ord, Show)
 
 intervals :: [(Interval, Info)]
 intervals = [
@@ -87,13 +87,13 @@ invert (MkInterval t d) = MkInterval (invertType t) (invertDelta d)
 deltasToInterval :: Info -> Interval
 deltasToInterval ii = case (filter ((== ii).snd) intervals) of
 	[(i,_)] -> i
-	[] -> deltasToInterval $ MkInfo (infoChromatic ii `mod` 7) (infoDiatonic ii `mod` 12)
+	[] -> deltasToInterval $ MkInfo (infoDiatonic ii `mod` 7) (infoChromatic ii `mod` 12)
 
 diatonicInterval :: Music.Mode -> Diatone -> Diatone -> Interval
-diatonicInterval m (d1,o1) (d2,o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
+diatonicInterval m dt1@(d1,o1) dt2@(d2,o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
 	where
 		diatonicDelta = abs $ (fromEnum d2) - (fromEnum d1) + 7*(o2 - o1)
-		chromaticDelta = abs $ (diatoneToAbsPitch m d2) - (diatoneToAbsPitch m d1) + 12*(o2 - o1)
+		chromaticDelta = abs $ (diatoneToChromaticDelta m dt2) - (diatoneToChromaticDelta m dt1)
 
 pcToDegree :: Music.PitchClass -> Int
 pcToDegree pc = case pc of
@@ -107,3 +107,9 @@ pitchInterval (pc1, o1) (pc2, o2) = deltasToInterval $ MkInfo diatonicDelta chro
 	where
 		diatonicDelta = abs $ pcToDegree pc2 - pcToDegree pc1 + 7*(o2 - o1)
 		chromaticDelta = abs $ Music.absPitch (pc2,o2) - Music.absPitch (pc1,o1)
+
+resolve :: Interval -> (Int, Interval)
+resolve interval
+	| interval == MkInterval Diminished Fifth = (1, MkInterval Major Third) -- Resolve 'inwards': up a diatone, then a Major Third
+	-- Needs to handle more cases :-)
+	| otherwise = error $ "Cannot resolve interval " ++ show interval ++ ": Its not dissonant (or not supported yet :-)"
