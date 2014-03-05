@@ -12,41 +12,53 @@ import Euterpea.Music.Note.MoreMusic
 
 data Degree = Tonic | SuperTonic | Mediant | SubDominant | Dominant | SubMediant | LeadingNote deriving (Eq, Ord, Show, Enum)
 
-type Diatone = (Degree, Octave)
+data Diatone = MkDiatone {diaDegree :: Degree, diaOctave :: Octave} deriving (Eq, Show)
+
+instance Ord Diatone where
+	l `compare` r = diatoneToChromaticDelta Major l `compare` diatoneToChromaticDelta Major r
+
+dti,dtii,dtiii,dtiv,dtv,dtvi,dtvii :: Octave -> Diatone
+dti octave = MkDiatone Tonic octave
+dtii octave = MkDiatone SuperTonic octave
+dtiii octave = MkDiatone Mediant octave
+dtiv octave = MkDiatone SubDominant octave
+dtv octave = MkDiatone Dominant octave
+dtvi octave = MkDiatone SubMediant octave
+dtvii octave = MkDiatone LeadingNote octave
 
 i,ii,iii,iv,v,vi,vii :: Octave -> Dur -> Music Diatone
-i octave dur = note dur $ (Tonic, octave)
-ii octave dur = note dur $ (SuperTonic, octave)
-iii octave dur = note dur $ (Mediant, octave)
-iv octave dur = note dur $ (SubDominant, octave)
-v octave dur = note dur $ (Dominant, octave)
-vi octave dur = note dur $ (SubMediant, octave)
-vii octave dur = note dur $ (LeadingNote, octave)
+i octave dur = note dur $ dti octave
+ii octave dur = note dur $ dtii octave
+iii octave dur = note dur $ dtiii octave
+iv octave dur = note dur $ dtiv octave
+v octave dur = note dur $ dtv octave
+vi octave dur = note dur $ dtvi octave
+vii octave dur = note dur $ dtvii octave
 
 diatoneToChromaticDelta :: Mode -> Diatone -> AbsPitch
-diatoneToChromaticDelta Major (Tonic, o) = 0 + o*12
-diatoneToChromaticDelta Major (SuperTonic, o) = 2 + o*12
-diatoneToChromaticDelta Major (Mediant, o) = 4 + o*12
-diatoneToChromaticDelta Major (SubDominant, o) = 5 + o*12
-diatoneToChromaticDelta Major (Dominant, o) = 7 + o*12
-diatoneToChromaticDelta Major (SubMediant, o) = 9 + o*12
-diatoneToChromaticDelta Major (LeadingNote, o) = 11 + o*12
-diatoneToChromaticDelta Minor (Tonic, o) = 0 + o*12
-diatoneToChromaticDelta Minor (SuperTonic, o) = 2 + o*12
-diatoneToChromaticDelta Minor (Mediant, o) = 3 + o*12
-diatoneToChromaticDelta Minor (SubDominant, o) = 5 + o*12
-diatoneToChromaticDelta Minor (Dominant, o) = 7 + o*12
-diatoneToChromaticDelta Minor (SubMediant, o) = 8 + o*12
-diatoneToChromaticDelta Minor (LeadingNote, o) = 10 + o*12
+diatoneToChromaticDelta Major (MkDiatone Tonic o) = 0 + o*12
+diatoneToChromaticDelta Major (MkDiatone SuperTonic o) = 2 + o*12
+diatoneToChromaticDelta Major (MkDiatone Mediant o) = 4 + o*12
+diatoneToChromaticDelta Major (MkDiatone SubDominant o) = 5 + o*12
+diatoneToChromaticDelta Major (MkDiatone Dominant o) = 7 + o*12
+diatoneToChromaticDelta Major (MkDiatone SubMediant o) = 9 + o*12
+diatoneToChromaticDelta Major (MkDiatone LeadingNote o) = 11 + o*12
+diatoneToChromaticDelta Minor (MkDiatone Tonic o) = 0 + o*12
+diatoneToChromaticDelta Minor (MkDiatone SuperTonic o) = 2 + o*12
+diatoneToChromaticDelta Minor (MkDiatone Mediant o) = 3 + o*12
+diatoneToChromaticDelta Minor (MkDiatone SubDominant o) = 5 + o*12
+diatoneToChromaticDelta Minor (MkDiatone Dominant o) = 7 + o*12
+diatoneToChromaticDelta Minor (MkDiatone SubMediant o) = 8 + o*12
+diatoneToChromaticDelta Minor (MkDiatone LeadingNote o) = 11 + o*12
 
 diatoneToPitch :: PitchClass -> Mode -> Octave -> Diatone -> Pitch
-diatoneToPitch pc mode baseOct (deg, octave) = pitch $ (pcToInt pc) + (baseOct+octave)*12 + (diatoneToChromaticDelta mode (deg, 0))
+diatoneToPitch pc mode baseOct (MkDiatone deg octave) = pitch $ (pcToInt pc) + (baseOct+octave)*12 + (diatoneToChromaticDelta mode (MkDiatone deg 0))
 
 mDiatoneToPitch :: PitchClass -> Mode -> Octave -> Music Diatone -> Music Pitch
 mDiatoneToPitch pc mode octave m = mMap (diatoneToPitch pc mode octave) m
 
 transposeDiatone :: Int -> Diatone -> Diatone
-transposeDiatone offset (deg, octave) = (toEnum degM, octave + octaveO)
+transposeDiatone offset (MkDiatone deg octave) = (MkDiatone (toEnum degM) (octave + octaveO))
 	where
 		degZ = fromEnum(deg) + offset
 		degM = degZ `mod` 7

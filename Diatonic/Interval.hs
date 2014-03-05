@@ -90,7 +90,7 @@ deltasToInterval ii = case (filter ((== ii).snd) intervals) of
 	[] -> deltasToInterval $ MkInfo (infoDiatonic ii `mod` 7) (infoChromatic ii `mod` 12)
 
 diatonicInterval :: Music.Mode -> Diatone -> Diatone -> Interval
-diatonicInterval m dt1@(d1,o1) dt2@(d2,o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
+diatonicInterval m dt1@(MkDiatone d1 o1) dt2@(MkDiatone d2 o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
 	where
 		diatonicDelta = abs $ (fromEnum d2) - (fromEnum d1) + 7*(o2 - o1)
 		chromaticDelta = abs $ (diatoneToChromaticDelta m dt2) - (diatoneToChromaticDelta m dt1)

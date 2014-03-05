@@ -49,31 +49,31 @@ testInvert = TestLabel "invert" $ TestList
 		test e i = (show i) ~: e ~=? invert i
 
 testDiatonicIntervalMajor = TestLabel "diatonicInterval Major" $ TestList
-	[ test (MkInterval Perfect Unison)		(Tonic, 4) (Tonic, 4)
-	, test (MkInterval Major Third)			(Tonic, 4) (Mediant, 4)
-	, test (MkInterval Major Third)			(Mediant, 4) (Tonic, 4)
-	, test (MkInterval Perfect Fifth)		(Tonic, 4) (Dominant, 4)
-	, test (MkInterval Perfect Octave)		(Tonic, 4) (Tonic, 5)
-	, test (MkInterval Perfect Octave)		(Tonic, 5) (Tonic, 4)
-	, test (MkInterval Major Ninth)			(Tonic, 4) (SuperTonic, 5)
-	, test (MkInterval Major Third)			(Tonic, 4) (Mediant, 5)
-	, test (MkInterval Perfect Eleventh)	(Tonic, 4) (SubDominant, 5)
-	, test (MkInterval Major Thirteenth)	(Tonic, 4) (SubMediant, 5)
+	[ test (MkInterval Perfect Unison)		(dti 4) (dti 4)
+	, test (MkInterval Major Third)			(dti 4) (dtiii 4)
+	, test (MkInterval Major Third)			(dtiii 4) (dti 4)
+	, test (MkInterval Perfect Fifth)		(dti 4) (dtv 4)
+	, test (MkInterval Perfect Octave)		(dti 4) (dti 5)
+	, test (MkInterval Perfect Octave)		(dti 5) (dti 4)
+	, test (MkInterval Major Ninth)			(dti 4) (dtii 5)
+	, test (MkInterval Major Third)			(dti 4) (dtiii 5)
+	, test (MkInterval Perfect Eleventh)	(dti 4) (dtiv 5)
+	, test (MkInterval Major Thirteenth)	(dti 4) (dtvi 5)
 	]
 	where
 		test e d1 d2 = show d1 ++ show d2 ~: e ~=? diatonicInterval Music.Major d1 d2
 
 testDiatonicIntervalMinor = TestLabel "diatonicInterval Minor" $ TestList
-	[ test (MkInterval Perfect Unison)		(Tonic, 4) (Tonic, 4)
-	, test (MkInterval Minor Third)			(Tonic, 4) (Mediant, 4)
-	, test (MkInterval Minor Third)			(Mediant, 4) (Tonic, 4)
-	, test (MkInterval Perfect Fifth)		(Tonic, 4) (Dominant, 4)
-	, test (MkInterval Perfect Octave)		(Tonic, 4) (Tonic, 5)
-	, test (MkInterval Perfect Octave)		(Tonic, 5) (Tonic, 4)
-	, test (MkInterval Major Ninth)			(Tonic, 4) (SuperTonic, 5)
-	, test (MkInterval Minor Third)			(Tonic, 4) (Mediant, 5)
-	, test (MkInterval Perfect Eleventh)	(Tonic, 4) (SubDominant, 5)
-	, test (MkInterval Minor Thirteenth)	(Tonic, 4) (SubMediant, 5)
+	[ test (MkInterval Perfect Unison)		(dti 4) (dti 4)
+	, test (MkInterval Minor Third)			(dti 4) (dtiii 4)
+	, test (MkInterval Minor Third)			(dtiii 4) (dti 4)
+	, test (MkInterval Perfect Fifth)		(dti 4) (dtv 4)
+	, test (MkInterval Perfect Octave)		(dti 4) (dti 5)
+	, test (MkInterval Perfect Octave)		(dti 5) (dti 4)
+	, test (MkInterval Major Ninth)			(dti 4) (dtii 5)
+	, test (MkInterval Minor Third)			(dti 4) (dtiii 5)
+	, test (MkInterval Perfect Eleventh)	(dti 4) (dtiv 5)
+	, test (MkInterval Minor Thirteenth)	(dti 4) (dtvi 5)
 	]
 	where
 		test e d1 d2 = show d1 ++ show d2 ~: e ~=? diatonicInterval Music.Minor d1 d2
