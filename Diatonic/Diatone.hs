@@ -35,20 +35,6 @@ v octave dur = note dur $ dtv octave
 vi octave dur = note dur $ dtvi octave
 vii octave dur = note dur $ dtvii octave
 
-pcToBasePc :: PitchClass -> PitchClass
-pcToBasePc pc  = case pc of
-  Cff  -> C;   Cf  -> C;   C  -> C;   Cs  -> C;   Css  -> C;
-  Dff  -> D;   Df  -> D;   D  -> D;   Ds  -> D;   Dss  -> D;
-  Eff  -> E;   Ef  -> E;   E  -> E;   Es  -> E;   Ess  -> E;
-  Fff  -> F;   Ff  -> F;   F  -> F;   Fs  -> F;   Fss  -> F;
-  Gff  -> G;   Gf  -> G;   G  -> G;   Gs  -> G;   Gss  -> G;
-  Aff  -> A;   Af  -> A;   A  -> A;   As  -> A;   Ass  -> A;
-  Bff  -> B;   Bf  -> B;   B  -> B;   Bs  -> B;   Bss  -> B
-
-basePcToInt :: PitchClass -> Int
-basePcToInt pc = case pc of
-  C -> 0; D -> 1; E -> 2; F -> 3; G -> 4; A -> 5; B -> 6
-
 diatoneToChromaticDelta :: Mode -> Diatone -> AbsPitch
 diatoneToChromaticDelta Major (MkDiatone Tonic o) = 0 + o*12
 diatoneToChromaticDelta Major (MkDiatone SuperTonic o) = 2 + o*12
@@ -71,8 +57,8 @@ diatoneToAbsPitch pc mode (MkDiatone deg octave) = (pcToInt pc) + octave*12 + (d
 diatoneToPitch :: PitchClass -> Mode -> Diatone -> Pitch
 diatoneToPitch pc mode (MkDiatone d o) = (pitchInKey pc mode (fromEnum d), o + extraO)
   where
-    baseDegree = basePcToInt $ pcToBasePc pc
-    extraO = if baseDegree + fromEnum d > 6 then 1 else 0
+    baseDegreeOfScale = pcToBasePc pc
+    extraO = if fromEnum baseDegreeOfScale + fromEnum d > 6 then 1 else 0
 
 mDiatoneToPitch :: PitchClass -> Mode -> Music Diatone -> Music Pitch
 mDiatoneToPitch pc mode m = mMap (diatoneToPitch pc mode) m

@@ -1,6 +1,7 @@
 -- Interval based music: easy to transpose within a key
 
 module Diatonic.Interval where
+import Diatonic.Keys
 import Diatonic.Diatone
 import qualified Euterpea.Music.Note.Music as Music
 
@@ -95,18 +96,12 @@ diatonicInterval m dt1@(MkDiatone d1 o1) dt2@(MkDiatone d2 o2) = deltasToInterva
 		diatonicDelta = abs $ (fromEnum d2) - (fromEnum d1) + 7*(o2 - o1)
 		chromaticDelta = abs $ (diatoneToChromaticDelta m dt2) - (diatoneToChromaticDelta m dt1)
 
-pcToDegree :: Music.PitchClass -> Int
-pcToDegree pc = case pc of
-	Music.Cff -> 1; Music.Cf -> 1; Music.C -> 1; Music.Dff -> 2; Music.Cs -> 1; Music.Df -> 2; Music.Css -> 1; Music.D -> 2; Music.Eff -> 3; Music.Ds -> 2;
-	Music.Ef -> 3; Music.Fff -> 4; Music.Dss -> 2; Music.E -> 3; Music.Ff -> 4; Music.Es -> 3; Music.F -> 4; Music.Gff -> 5; Music.Ess -> 3; Music.Fs -> 4;
-	Music.Gf -> 5; Music.Fss -> 4; Music.G -> 5; Music.Aff -> 6; Music.Gs -> 5; Music.Af -> 6; Music.Gss -> 5; Music.A -> 6; Music.Bff -> 7; Music.As -> 6;
-	Music.Bf -> 7; Music.Ass -> 6; Music.B -> 7; Music.Bs -> 7; Music.Bss -> 7;
-
 pitchInterval :: Music.Pitch -> Music.Pitch -> Interval
 pitchInterval (pc1, o1) (pc2, o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
 	where
-		diatonicDelta = abs $ pcToDegree pc2 - pcToDegree pc1 + 7*(o2 - o1)
+		diatonicDelta = abs $ pcToBaseInt pc2 - pcToBaseInt pc1 + 7*(o2 - o1)
 		chromaticDelta = abs $ Music.absPitch (pc2,o2) - Music.absPitch (pc1,o1)
+		pcToBaseInt pc = fromEnum $ pcToBasePc pc
 
 resolve :: Interval -> (Int, Interval)
 resolve interval

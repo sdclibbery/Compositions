@@ -25,7 +25,7 @@ hasEveryDegree :: [PitchClass] -> Bool
 hasEveryDegree pcs = all (flip elem degrees) allDegrees && length pcs == length allDegrees
     where
         degrees = map pcToBasePc pcs
-        allDegrees = [C, D, E, F, G, A, B]
+        allDegrees = [C' .. B']
 
 majorKeys :: [PitchClass]
 majorKeys = [Cf, Gf, Df, Af, Ef, Bf, F, C, G, D, A, E, B, Fs, Cs]

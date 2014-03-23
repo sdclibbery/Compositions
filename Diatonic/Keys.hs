@@ -3,6 +3,18 @@
 module Diatonic.Keys where
 import Euterpea.Music.Note.Music
 
+data BasePitchClass = C' | D' | E' | F' | G' | A' | B' deriving (Show, Eq, Ord, Enum)
+
+pcToBasePc :: PitchClass -> BasePitchClass
+pcToBasePc pc  = case pc of
+  Cff  -> C';   Cf  -> C';   C  -> C';   Cs  -> C';   Css  -> C';
+  Dff  -> D';   Df  -> D';   D  -> D';   Ds  -> D';   Dss  -> D';
+  Eff  -> E';   Ef  -> E';   E  -> E';   Es  -> E';   Ess  -> E';
+  Fff  -> F';   Ff  -> F';   F  -> F';   Fs  -> F';   Fss  -> F';
+  Gff  -> G';   Gf  -> G';   G  -> G';   Gs  -> G';   Gss  -> G';
+  Aff  -> A';   Af  -> A';   A  -> A';   As  -> A';   Ass  -> A';
+  Bff  -> B';   Bf  -> B';   B  -> B';   Bs  -> B';   Bss  -> B'
+
 pitchInKey :: PitchClass -> Mode -> Int -> PitchClass
 pitchInKey Cf Major d = [Cf, Df, Ef, Ff, Gf, Af, Bf] !! d
 pitchInKey Gf Major d = [Gf, Af, Bf, Cf, Df, Ef, F ] !! d
