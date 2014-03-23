@@ -1,13 +1,71 @@
--- Interval based music: easy to transpose within a key
+{-|
+Module      : Diatonic.Interval
+Description : Define and work with diatonic intervals
+-}
 
 module Diatonic.Interval where
 import Diatonic.Keys
 import Diatonic.Diatone
 import qualified Euterpea.Music.Note.Music as Music
 
+-- |Definition of a Diatonic interval
 data Interval = MkInterval { intType :: Type, intDelta :: Delta } deriving (Eq, Ord, Show)
+
+-- |Basic categorisations on intervals
 data Type = Perfect | Major | Minor | Diminished | Augmented deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- |Actual diatonic difference of an interval
 data Delta = Unison | Second | Third | Fourth | Fifth | Sixth | Seventh | Octave | Ninth | Eleventh | Thirteenth deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- |Determine whether an interval definition represents a valid interval
+isValid :: Interval -> Bool
+isValid i = case (lookup i intervals) of
+	Just _ -> True
+	Nothing -> False
+
+-- |Determine whether an interval is dissonant
+isDissonant :: Interval -> Bool
+isDissonant i = case i of
+  MkInterval { intDelta = Second }     -> True
+  MkInterval { intDelta = Seventh }    -> True
+  MkInterval { intDelta = Eleventh }   -> True
+  MkInterval { intDelta = Thirteenth } -> True
+  MkInterval { intType = Diminished }  -> True
+  MkInterval { intType = Augmented }   -> True
+  otherwise                            -> False
+
+-- |Determine whether an interval is consonant
+isConsonant :: Interval -> Bool
+isConsonant i = not $ isDissonant i
+
+-- |Invert an interval
+invert :: Interval -> Interval
+invert (MkInterval t d) = MkInterval (invertType t) (invertDelta d)
+
+-- |Given two diatonic pitches, get the interval between them
+diatonicInterval :: Music.Mode -> Diatone -> Diatone -> Interval
+diatonicInterval m dt1@(MkDiatone d1 o1) dt2@(MkDiatone d2 o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
+	where
+		diatonicDelta = abs $ (fromEnum d2) - (fromEnum d1) + 7*(o2 - o1)
+		chromaticDelta = abs $ (diatoneToChromaticDelta m dt2) - (diatoneToChromaticDelta m dt1)
+
+-- |Given two pitches, get the interval between them
+pitchInterval :: Music.Pitch -> Music.Pitch -> Interval
+pitchInterval (pc1, o1) (pc2, o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
+	where
+		diatonicDelta = abs $ pcToBaseInt pc2 - pcToBaseInt pc1 + 7*(o2 - o1)
+		chromaticDelta = abs $ Music.absPitch (pc2,o2) - Music.absPitch (pc1,o1)
+		pcToBaseInt pc = fromEnum $ pcToBasePc pc
+
+-- |Get the interval representing the resolution of another, dissonant, interval
+resolve :: Interval -> (Int, Interval)
+resolve interval
+	| interval == MkInterval Diminished Fifth = (1, MkInterval Major Third) -- Resolve 'inwards': up a diatone, then a Major Third
+	-- Needs to handle more cases :-)
+	| otherwise = error $ "Cannot resolve interval " ++ show interval ++ ": Its not dissonant (or not supported yet :-)"
+
+
+-- Helpers
 
 data Info = MkInfo { infoDiatonic :: Int, infoChromatic :: Int } deriving (Eq, Ord, Show)
 
@@ -46,24 +104,6 @@ intervals = [
 	( MkInterval Augmented Thirteenth,	MkInfo 12 22 )
 	]
 
-isValid :: Interval -> Bool
-isValid i = case (lookup i intervals) of
-	Just _ -> True
-	Nothing -> False
-
-isDissonant :: Interval -> Bool
-isDissonant i = case i of
-  MkInterval { intDelta = Second }     -> True
-  MkInterval { intDelta = Seventh }    -> True
-  MkInterval { intDelta = Eleventh }   -> True
-  MkInterval { intDelta = Thirteenth } -> True
-  MkInterval { intType = Diminished }  -> True
-  MkInterval { intType = Augmented }   -> True
-  otherwise                            -> False
-
-isConsonant :: Interval -> Bool
-isConsonant i = not $ isDissonant i
-
 invertType :: Type -> Type
 invertType Perfect = Perfect
 invertType Minor = Major
@@ -82,29 +122,8 @@ invertDelta Seventh = Second
 invertDelta Octave = Unison
 invertDelta d = error $ "Cannot invert a " ++ show d
 
-invert :: Interval -> Interval
-invert (MkInterval t d) = MkInterval (invertType t) (invertDelta d)
-
 deltasToInterval :: Info -> Interval
 deltasToInterval ii = case (filter ((== ii).snd) intervals) of
 	[(i,_)] -> i
 	[] -> deltasToInterval $ MkInfo (infoDiatonic ii `mod` 7) (infoChromatic ii `mod` 12)
 
-diatonicInterval :: Music.Mode -> Diatone -> Diatone -> Interval
-diatonicInterval m dt1@(MkDiatone d1 o1) dt2@(MkDiatone d2 o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
-	where
-		diatonicDelta = abs $ (fromEnum d2) - (fromEnum d1) + 7*(o2 - o1)
-		chromaticDelta = abs $ (diatoneToChromaticDelta m dt2) - (diatoneToChromaticDelta m dt1)
-
-pitchInterval :: Music.Pitch -> Music.Pitch -> Interval
-pitchInterval (pc1, o1) (pc2, o2) = deltasToInterval $ MkInfo diatonicDelta chromaticDelta
-	where
-		diatonicDelta = abs $ pcToBaseInt pc2 - pcToBaseInt pc1 + 7*(o2 - o1)
-		chromaticDelta = abs $ Music.absPitch (pc2,o2) - Music.absPitch (pc1,o1)
-		pcToBaseInt pc = fromEnum $ pcToBasePc pc
-
-resolve :: Interval -> (Int, Interval)
-resolve interval
-	| interval == MkInterval Diminished Fifth = (1, MkInterval Major Third) -- Resolve 'inwards': up a diatone, then a Major Third
-	-- Needs to handle more cases :-)
-	| otherwise = error $ "Cannot resolve interval " ++ show interval ++ ": Its not dissonant (or not supported yet :-)"

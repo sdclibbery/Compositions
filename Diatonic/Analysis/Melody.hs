@@ -1,4 +1,11 @@
--- Analysis of Melody: IE a sequential composition 
+{-|
+Module      : Diatonic.Analysis.Melody
+Description : Provide harmonic and contrapuntal analysis of purely sequential (melodic) music
+
+Provide analysis of purely sequential (melodic) music.
+No analysis of note against note (ie harmonic or contrapuntal) is undertaken in this module.
+The analytic rules is according to Ebeneezer Prouts books 'Harmony' and 'Counterpoint'.
+-}
 
 module Diatonic.Analysis.Melody where
 import Euterpea.Music.Note.Music
@@ -7,14 +14,20 @@ import Diatonic.Interval
 import Diatonic.Diatone
 import qualified Data.Maybe
 
+-- |Define time within some music
 type Time = Rational
+
+-- |Define the source for an error or warning within Prouts books
 data Source = Harmony Int | CounterPoint Int deriving (Eq, Ord, Show)
+
+-- |One analysis result: an error or warning
 data Result = Warning Time Source String | Error Time Source String deriving (Eq, Ord, Show)
 
--- Main interface
-
+-- |Provide a melodic analysis of some music
 analyseMusic :: Mode -> Music Diatone -> [Result]
 analyseMusic mo m = foldr ((++) . analyseMelody mo) [] $ musicToMelodies m
+
+-- Helpers
 
 -- Section 89 in Prouts Harmony
 -- Any dissonance other than a second is bad

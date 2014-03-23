@@ -1,10 +1,15 @@
--- Diatonic keys
+{-|
+Module      : Diatonic.Keys
+Description : Supply key definitions for standard diatonic musical keys
+-}
 
 module Diatonic.Keys where
 import Euterpea.Music.Note.Music
 
+-- |Basic Diatonic pitches. The unflattened / unsharpened notes on a normal musical stave.
 data BasePitchClass = C' | D' | E' | F' | G' | A' | B' deriving (Show, Eq, Ord, Enum)
 
+-- |Get the unsharpened and unflattened version of a PitchClass
 pcToBasePc :: PitchClass -> BasePitchClass
 pcToBasePc pc  = case pc of
   Cff  -> C';   Cf  -> C';   C  -> C';   Cs  -> C';   Css  -> C';
@@ -15,6 +20,7 @@ pcToBasePc pc  = case pc of
   Aff  -> A';   Af  -> A';   A  -> A';   As  -> A';   Ass  -> A';
   Bff  -> B';   Bf  -> B';   B  -> B';   Bs  -> B';   Bss  -> B'
 
+-- |Get a note from a standard key
 pitchInKey :: PitchClass -> Mode -> Int -> PitchClass
 pitchInKey Cf Major d = [Cf, Df, Ef, Ff, Gf, Af, Bf] !! d
 pitchInKey Gf Major d = [Gf, Af, Bf, Cf, Df, Ef, F ] !! d
