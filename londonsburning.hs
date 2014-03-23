@@ -18,7 +18,7 @@ part4 = v 0 en :+: iv 0 en :+: twice (iii 0 qn)
 
 subject = twice part1 :+: twice part2 :+: twice part3 :+: twice part4
 
-intoKey = mDiatoneToPitch G Major 4
+intoKey = mDiatoneToPitch G Major
 
 music = instrument MusicBox $
   intoKey subject
@@ -34,6 +34,6 @@ londonsBurning = music :=: rythm
 
 main :: IO ()
 main = do
-  print $ analyseMelody $ intoKey subject
+  print $ analyseMusic Major subject
 --  print $ findDischordsM londonsBurning
 --  play londonsBurning

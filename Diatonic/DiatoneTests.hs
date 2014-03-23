@@ -31,12 +31,19 @@ testDiatoneOrd = TestLabel "diatoneOrd" $ TestList
 					test e l r = (show l ++ show r) ~: e ~=? l `compare` r
 
 testDiatoneToPitch = TestLabel "diatoneToPitch" $ TestList
-				[ test (C,4)	C Major 4 (dti 0)
-				, test (E,4)	C Major 4 (dtiii 0)
-				, test (C,5)	A Minor 4 (dtiii 0)
---				, test (Ef,4)	C Minor 4 (dtiii 0)
+				[ test (C,4)	C Major (dti 4)
+				, test (G,4)	G Major (dti 4)
+				, test (Bf,4)	Bf Major (dti 4)
+				, test (D,4)	C Major (dtii 4)
+				, test (B,4)	C Major (dtvii 4)
+				, test (Fs,5)	G Major (dtvii 4)
+				, test (C,5)	Bf Major (dtii 4)
+				, test (Ef,5)	Bf Major (dtiv 4)
+				, test (C,5)	A Minor (dtiii 4)
+				, test (C,5)	A Minor (dtiii 4)
+				, test (Ef,4)	C Minor (dtiii 4)
 				] where
-					test e pc mo o d = (show pc ++ show mo ++ show d) ~: e ~=? diatoneToPitch pc mo o d
+					test e pc mo d = (show pc ++ show mo ++ show d) ~: e ~=? diatoneToPitch pc mo d
 
 testTransposeDiatone = TestLabel "transposeDiatone" $ TestList
 				[ test (dti 0)			0 (dti 0)

@@ -2,11 +2,11 @@
 
 {-
 TODO:
-* Minor scale diatoneToPitch is not right because it only converts via AbsPitch and that is wrong :-/ See commented test...
 * Should really have mPitchToDiatone here too to complement mDiatoneToPitch :-)
 -}
 
 module Diatonic.Diatone where
+import Diatonic.Keys
 import Euterpea.Music.Note.Music
 import Euterpea.Music.Note.MoreMusic
 
@@ -35,6 +35,20 @@ v octave dur = note dur $ dtv octave
 vi octave dur = note dur $ dtvi octave
 vii octave dur = note dur $ dtvii octave
 
+pcToBasePc :: PitchClass -> PitchClass
+pcToBasePc pc  = case pc of
+  Cff  -> C;   Cf  -> C;   C  -> C;   Cs  -> C;   Css  -> C;
+  Dff  -> D;   Df  -> D;   D  -> D;   Ds  -> D;   Dss  -> D;
+  Eff  -> E;   Ef  -> E;   E  -> E;   Es  -> E;   Ess  -> E;
+  Fff  -> F;   Ff  -> F;   F  -> F;   Fs  -> F;   Fss  -> F;
+  Gff  -> G;   Gf  -> G;   G  -> G;   Gs  -> G;   Gss  -> G;
+  Aff  -> A;   Af  -> A;   A  -> A;   As  -> A;   Ass  -> A;
+  Bff  -> B;   Bf  -> B;   B  -> B;   Bs  -> B;   Bss  -> B
+
+basePcToInt :: PitchClass -> Int
+basePcToInt pc = case pc of
+  C -> 0; D -> 1; E -> 2; F -> 3; G -> 4; A -> 5; B -> 6
+
 diatoneToChromaticDelta :: Mode -> Diatone -> AbsPitch
 diatoneToChromaticDelta Major (MkDiatone Tonic o) = 0 + o*12
 diatoneToChromaticDelta Major (MkDiatone SuperTonic o) = 2 + o*12
@@ -51,11 +65,17 @@ diatoneToChromaticDelta Minor (MkDiatone Dominant o) = 7 + o*12
 diatoneToChromaticDelta Minor (MkDiatone SubMediant o) = 8 + o*12
 diatoneToChromaticDelta Minor (MkDiatone LeadingNote o) = 11 + o*12
 
-diatoneToPitch :: PitchClass -> Mode -> Octave -> Diatone -> Pitch
-diatoneToPitch pc mode baseOct (MkDiatone deg octave) = pitch $ (pcToInt pc) + (baseOct+octave)*12 + (diatoneToChromaticDelta mode (MkDiatone deg 0))
+diatoneToAbsPitch :: PitchClass -> Mode -> Diatone -> AbsPitch
+diatoneToAbsPitch pc mode (MkDiatone deg octave) = (pcToInt pc) + octave*12 + (diatoneToChromaticDelta mode (MkDiatone deg 0))
 
-mDiatoneToPitch :: PitchClass -> Mode -> Octave -> Music Diatone -> Music Pitch
-mDiatoneToPitch pc mode octave m = mMap (diatoneToPitch pc mode octave) m
+diatoneToPitch :: PitchClass -> Mode -> Diatone -> Pitch
+diatoneToPitch pc mode (MkDiatone d o) = (pitchInKey pc mode (fromEnum d), o + extraO)
+  where
+    baseDegree = basePcToInt $ pcToBasePc pc
+    extraO = if baseDegree + fromEnum d > 6 then 1 else 0
+
+mDiatoneToPitch :: PitchClass -> Mode -> Music Diatone -> Music Pitch
+mDiatoneToPitch pc mode m = mMap (diatoneToPitch pc mode) m
 
 transposeDiatone :: Int -> Diatone -> Diatone
 transposeDiatone offset (MkDiatone deg octave) = (MkDiatone (toEnum degM) (octave + octaveO))

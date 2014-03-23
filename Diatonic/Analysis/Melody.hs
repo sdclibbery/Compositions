@@ -7,11 +7,6 @@ import Diatonic.Interval
 import Diatonic.Diatone
 import qualified Data.Maybe
 
-{-
-TODO:
-* More rules :-)
--}
-
 type Time = Rational
 data Source = Harmony Int | CounterPoint Int deriving (Eq, Ord, Show)
 data Result = Warning Time Source String | Error Time Source String deriving (Eq, Ord, Show)
@@ -21,7 +16,7 @@ data Result = Warning Time Source String | Error Time Source String deriving (Eq
 analyseMusic :: Mode -> Music Diatone -> [Result]
 analyseMusic mo m = foldr ((++) . analyseMelody mo) [] $ musicToMelodies m
 
--- Section 89 in Prousts Harmony
+-- Section 89 in Prouts Harmony
 -- Any dissonance other than a second is bad
 ruleS89 :: Mode -> IntervalInfo -> [Result]
 ruleS89 mo (t, i, md0, d1, d2, md3)
@@ -31,7 +26,7 @@ ruleS89 mo (t, i, md0, d1, d2, md3)
 	| intType i == Augmented	= [] -- Leave for rule S91
 	| otherwise					= [Error t (Harmony 89) $ "Dissonance " ++ show (intType i) ++ show (intDelta i)]
 
--- Section 90 in Prousts Harmony
+-- Section 90 in Prouts Harmony
 -- A diminished interval must be resolved correctly
 ruleS90 :: Mode -> IntervalInfo -> [Result]
 ruleS90 mo (t, i, md0, d1, d2, md3)
@@ -47,14 +42,14 @@ ruleS90 mo (t, i, md0, d1, d2, md3)
 				else [Error t (Harmony 90) $ "Unresolved "  ++ msg]
 		isInInterval d1 d2 d3 = d3 > min d1 d2 && d3 < max d1 d2
 
--- Section 91 in Prousts Harmony
+-- Section 91 in Prouts Harmony
 -- An augmented interval is always bad (except augmented second)
 ruleS91 :: Mode -> IntervalInfo -> [Result]
 ruleS91 mo (t, i, md0, d1, d2, md3)
 	| intType i == Augmented && intDelta i /= Second = [Error t (Harmony 91) $ "Dissonance " ++ show (intType i) ++ show (intDelta i)]
 	| otherwise = []
 
--- Section 92 in Prousts Harmony
+-- Section 92 in Prouts Harmony
 -- A large interval must be approached and left in the opposite direction to the interval
 ruleS92 :: Mode -> IntervalInfo -> [Result]
 ruleS92 mo (t, i, md0, d1, d2, md3) = approach md0 ++ leave md3
@@ -81,6 +76,17 @@ resolution mo d1 d2
 		upperResolution = transposeDiatone (fromEnum $ intDelta resolvedInterval) lowerResolution
 		lowerDiatone = min d1 d2
 
+-- Apply the rules to analyse a single melody 
+
+analyseMelody :: Mode -> Melody Diatone -> [Result]
+analyseMelody mo mel = foldr rules [] $ notesToIntervals mo mel
+	where
+		rules ii rs = rs
+			++ ruleS89 mo ii
+			++ ruleS90 mo ii
+			++ ruleS91 mo ii
+			++ ruleS92 mo ii
+
 -- Helpers to turn an arbitrary Music into a processed set of melodies that can be analysed by the rules
 
 type Sequence a = (Time, Music a)
@@ -105,15 +111,6 @@ toIntervalInfo mo t ((mn0, (t1,d1), (_,d2), mn3):xs) = (t+t1, i, fmap snd mn0, d
 
 notesToIntervals :: Mode -> Melody Diatone -> [IntervalInfo]
 notesToIntervals mo (t, ns) = toIntervalInfo mo t $ listExpand ns
-
-analyseMelody :: Mode -> Melody Diatone -> [Result]
-analyseMelody mo mel = foldr rules [] $ notesToIntervals mo mel
-	where
-		rules ii rs = rs
-			++ ruleS89 mo ii
-			++ ruleS90 mo ii
-			++ ruleS91 mo ii
-			++ ruleS92 mo ii
 
 sequences :: Time -> Music a -> [Sequence a]
 sequences t (m1 :=: m2) = sequences t m1 ++ sequences t m2
