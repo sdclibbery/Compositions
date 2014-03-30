@@ -12,10 +12,8 @@ import Euterpea.Music.Note.Music
 import Euterpea.Music.Note.MoreMusic
 import Diatonic.Interval
 import Diatonic.Diatone
+import Diatonic.Analysis.Deconstruct
 import qualified Data.Maybe
-
--- |Define time within some music
-type Time = Rational
 
 -- |Define the source for an error or warning within Prouts books
 data Source = Harmony Int | CounterPoint Int deriving (Eq, Ord, Show)
@@ -25,7 +23,7 @@ data Result = Warning Time Source String | Error Time Source String deriving (Eq
 
 -- |Provide a melodic analysis of some music
 analyseMusic :: Mode -> Music Diatone -> [Result]
-analyseMusic mo m = foldr ((++) . analyseMelody mo) [] $ musicToMelodies m
+analyseMusic mo m = foldr ((++) . analyseSequence mo) [] $ musicToSequences m
 
 -- Helpers
 
@@ -91,8 +89,8 @@ resolution mo d1 d2
 
 -- Apply the rules to analyse a single melody 
 
-analyseMelody :: Mode -> Melody Diatone -> [Result]
-analyseMelody mo mel = foldr rules [] $ notesToIntervals mo mel
+analyseSequence :: Mode -> Sequence Diatone -> [Result]
+analyseSequence mo seq = foldr rules [] $ notesToIntervals mo seq
 	where
 		rules ii rs = rs
 			++ ruleS89 mo ii
@@ -100,12 +98,17 @@ analyseMelody mo mel = foldr rules [] $ notesToIntervals mo mel
 			++ ruleS91 mo ii
 			++ ruleS92 mo ii
 
--- Helpers to turn an arbitrary Music into a processed set of melodies that can be analysed by the rules
 
-type Sequence a = (Time, Music a)
-type Line a = (Time, [Primitive a])
+-- Helpers to turn sequences into lists that show intervals suitable for rule apllication
+
 type IntervalInfo = (Time, Interval, Maybe Diatone, Diatone, Diatone, Maybe Diatone)
-type Melody a = (Time, [(Dur, a)])
+type DtEvent = Event Diatone
+
+toIntervalInfo :: Mode -> Time -> [(Maybe DtEvent, DtEvent, DtEvent, Maybe DtEvent)] -> [IntervalInfo]
+toIntervalInfo _ _ [] = []
+toIntervalInfo mo t ((mn0, (t1,d1), (_,d2), mn3):xs) = (t+t1, i, fmap snd mn0, d1, d2, fmap snd mn3) : toIntervalInfo mo (t+t1) xs
+	where
+		i = diatonicInterval mo d1 d2
 
 listExpand :: [a] -> [(Maybe a, a, a, Maybe a)]
 listExpand [] = []
@@ -116,42 +119,5 @@ listExpand (x1:x2:xs) = (Nothing, x1, x2, Data.Maybe.listToMaybe xs) : next x1 x
 		next x0 x1 (x2:[]) = [(Just x0, x1, x2, Nothing)]
 		next x0 x1 (x2:x3:xs) = (Just x0, x1, x2, Just x3) : next x1 x2 xs
 
-toIntervalInfo :: Mode -> Time -> [(Maybe (Dur, Diatone), (Dur, Diatone), (Dur, Diatone), Maybe (Dur, Diatone))] -> [IntervalInfo]
-toIntervalInfo _ _ [] = []
-toIntervalInfo mo t ((mn0, (t1,d1), (_,d2), mn3):xs) = (t+t1, i, fmap snd mn0, d1, d2, fmap snd mn3) : toIntervalInfo mo (t+t1) xs
-	where
-		i = diatonicInterval mo d1 d2
-
-notesToIntervals :: Mode -> Melody Diatone -> [IntervalInfo]
-notesToIntervals mo (t, ns) = toIntervalInfo mo t $ listExpand ns
-
-sequences :: Time -> Music a -> [Sequence a]
-sequences t (m1 :=: m2) = sequences t m1 ++ sequences t m2
-sequences t (m1 :+: m2) = sequences t m1 `combine` sequences (t + dur m1) m2
-  where
-    combine [(t1, m1)] [(t2, m2)] = [(t1, m1 :+: m2)]
-    combine s1 s2 = s1 ++ s2
-sequences t m = [(t, m)]
-
-flatten :: Sequence a -> Line a
-flatten (t, (Prim p)) = (t, [p])
-flatten (t, (m1 :+: m2)) = (t, snd (flatten (t,m1)) ++ snd (flatten (t,m2)))
-
-splitOnRests :: Line a -> [Line a]
-splitOnRests (t, prims) = case span (not.isRest) prims of
-    ([], []) -> []
-    (ps, []) -> [(t, ps)]
-    ([], pps) -> splitOnRests (remainder t pps)
-    (ps, pps) -> [(t, ps)] ++ splitOnRests (remainder (t + durNotes ps) pps)
-  where
-    remainder t pps = (t + durRest (head pps), tail pps)
-    durNotes = foldr (\(Note d _) a -> a + d) 0
-    durRest (Rest d) = d
-    isRest (Rest _) = True
-    isRest _ = False
-
-lineToMelody :: Line a -> Melody a
-lineToMelody (t,ps) = (t, map (\(Note d n) -> (d, n)) ps)
-
-musicToMelodies :: Music a -> [Melody a]
-musicToMelodies = map lineToMelody . concat . map splitOnRests . map flatten . sequences 0
+notesToIntervals :: Mode -> Sequence Diatone -> [IntervalInfo]
+notesToIntervals mo (Temporal t evts) = toIntervalInfo mo t $ listExpand evts
