@@ -29,6 +29,23 @@ type Line a = Temporal [Primitive a]
 type Sequence a = Temporal [Event a]
 
 
+-- |Convert a general Music into a list of Sequences, which are monophonic and continuous
+musicToSequences :: Music a -> [Sequence a]
+musicToSequences = map lineToSequence . concat . map splitOnRests . map flatten . monophonicParts 0
+
+-- |Correlate two sequences, giving a list of the overlapping items and when they occur
+correlateSequences :: (Sequence a, Sequence a) -> [(Time, a, a)]
+correlateSequences (Temporal _ [], Temporal _ _) = []
+correlateSequences (Temporal _ _, Temporal _ []) = []
+correlateSequences (Temporal t1 (e1:es1), Temporal t2 (e2:es2)) = if t1 < t2 then correlate t1 e1 es1 t2 e2 es2 else correlate t2 e2 es2 t1 e1 es1
+    where
+        correlate tl elo@(dl, xl) esl th eh@(dh, xh) esh = correlation ++ correlateSequences (truncatedlo, truncatedhi)
+            where
+                correlation = if overlap then [(th, xl, xh)] else []
+                overlap = tl + dl > th
+                truncatedlo = if tl + dl <= th + dh then Temporal (tl+dl) esl else Temporal th ((dl-th+tl, xl):esl)
+                truncatedhi = if tl + dl <= th + dh then Temporal th (eh:esh) else Temporal (th+dh) esh
+
 -- Split some music into a list of monophonic parts
 monophonicParts :: Time -> Music a -> [Part a]
 monophonicParts t (m1 :=: m2) = monophonicParts t m1 ++ monophonicParts t m2
@@ -64,7 +81,3 @@ splitOnRests (Temporal t prims) = case span (not.isRest) prims of
 -- Transform a Line with no rests in into a Sequence of notes
 lineToSequence :: Line a -> Sequence a
 lineToSequence (Temporal t ps) = (Temporal t $ map (\(Note d n) -> (d, n)) ps)
-
--- |Convert a general Music into a list of Sequences, which are monophonic and continuous
-musicToSequences :: Music a -> [Sequence a]
-musicToSequences = map lineToSequence . concat . map splitOnRests . map flatten . monophonicParts 0

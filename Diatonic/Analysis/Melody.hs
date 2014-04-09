@@ -1,10 +1,10 @@
 {-|
 Module      : Diatonic.Analysis.Melody
-Description : Provide harmonic and contrapuntal analysis of purely sequential (melodic) music
+Description : Provide a melodic analysis of some diatonic Music
 
 Provide analysis of purely sequential (melodic) music.
 No analysis of note against note (ie harmonic or contrapuntal) is undertaken in this module.
-The analytic rules is according to Ebeneezer Prouts books 'Harmony' and 'Counterpoint'.
+The analytic rules are according to Ebeneezer Prouts books 'Harmony' and 'Counterpoint'.
 -}
 
 module Diatonic.Analysis.Melody where
@@ -13,13 +13,8 @@ import Euterpea.Music.Note.MoreMusic
 import Diatonic.Interval
 import Diatonic.Diatone
 import Diatonic.Analysis.Deconstruct
+import Diatonic.Analysis.Report
 import qualified Data.Maybe
-
--- |Define the source for an error or warning within Prouts books
-data Source = Harmony Int | CounterPoint Int deriving (Eq, Ord, Show)
-
--- |One analysis result: an error or warning
-data Result = Warning Time Source String | Error Time Source String deriving (Eq, Ord, Show)
 
 -- |Provide a melodic analysis of some music
 analyseMusic :: Mode -> Music Diatone -> [Result]

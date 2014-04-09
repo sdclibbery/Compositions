@@ -4,13 +4,15 @@ import qualified Diatonic.IntervalTests
 import qualified Diatonic.KeysTests
 import qualified Diatonic.Analysis.DeconstructTests
 import qualified Diatonic.Analysis.MelodyTests
+import qualified Diatonic.Analysis.HarmonyTests
 
 {- TODO:
-* Refactor
- x Module to split an arbitrary Music up into 'parts', each being a list of 'sequences'
- * And also correlate the parts against each other suitable for harmonic analysis
-* Move on to Harmonic analysis...
- * Pull Result out as a separate shareable module..?
+* Add part odentification
+ * In Music as annotation if possible
+ * Through into all the analysis
+ * And then into all the rules
+ * Through into the error/warning reports
+* More harmonic analysis rules...
 -}
 
 main = do
@@ -20,4 +22,5 @@ main = do
 		, Diatonic.IntervalTests.tests
 		, Diatonic.Analysis.DeconstructTests.tests
 		, Diatonic.Analysis.MelodyTests.tests
+		, Diatonic.Analysis.HarmonyTests.tests
 		]
