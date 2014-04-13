@@ -45,19 +45,21 @@ partsToSequences :: [MusicPart a] -> [Sequence a]
 partsToSequences = concat . map processSequences . map (uncurry (monophonics 0))
 
 -- |Correlate two sequences, giving a list of the overlapping items and when they occur
-correlateSequences :: (Sequence a, Sequence a) -> [(Time, (Part, a), (Part, a))]
-correlateSequences (Temporal _ _ [], Temporal _ _ _) = []
-correlateSequences (Temporal _ _ _, Temporal _ _ []) = []
+correlateSequences :: (Sequence a, Sequence a) -> (Part, Part, [(Time, a, a)])
+correlateSequences (Temporal p1 _ [], Temporal p2 _ _) = (p1, p2, [])
+correlateSequences (Temporal p1 _ _, Temporal p2 _ []) = (p1, p2, [])
 correlateSequences (Temporal p1 t1 (e1:es1), Temporal p2 t2 (e2:es2)) = if t1 < t2 then correlate p1 t1 e1 es1 p2 t2 e2 es2 else correlate p2 t2 e2 es2 p1 t1 e1 es1
     where
-        correlate pl tl (dl, xl) esl ph th eh@(dh, xh) esh = correlation ++ correlateSequences (truncatedlo, truncatedhi)
+        correlate pl tl (dl, xl) esl ph th eh@(dh, xh) esh = correlation `combine` correlateSequences (truncatedlo, truncatedhi)
             where
-                correlation = if overlap then [(th, (pl, xl), (ph, xh))] else []
+                correlation = if overlap then (pl, ph, [(th, xl, xh)]) else (pl, ph, [])
                 overlap = tl + dl > th
                 truncatedlo = if tl + dl <= th + dh then Temporal pl (tl+dl) esl else Temporal pl th ((dl-th+tl, xl):esl)
                 truncatedhi = if tl + dl <= th + dh then Temporal ph th (eh:esh) else Temporal ph (th+dh) esh
+                combine (p1, p2, es1) (_, _, es2) = (p1, p2, es1 ++ es2)
 
 
+-- Process monophonic music sections into Sequences (lists of notes)
 processSequences :: [Monophonic a] -> [Sequence a]
 processSequences = map lineToSequence . concat . map splitOnRests . map flatten
 

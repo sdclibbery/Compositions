@@ -100,6 +100,7 @@ type Context = Part
 
 type IntervalInfo = (Time, Interval, Maybe Diatone, Diatone, Diatone, Maybe Diatone, Context)
 type DtEvent = Event Diatone
+
 toIntervalInfo :: Mode -> Part -> Time -> [(Maybe DtEvent, DtEvent, DtEvent, Maybe DtEvent)] -> [IntervalInfo]
 toIntervalInfo _ _ _ [] = []
 toIntervalInfo mo p t ((mn0, (t1,d1), (_,d2), mn3):xs) = (t+t1, i, fmap snd mn0, d1, d2, fmap snd mn3, p) : toIntervalInfo mo p (t+t1) xs

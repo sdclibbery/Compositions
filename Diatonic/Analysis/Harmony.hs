@@ -50,13 +50,13 @@ type Context = (PartContext, PartContext)
 
 type IntervalInfo = ( Time, Motion, Interval, Interval, Context )
 
-toIntervalInfos :: Mode -> [(Time, (Part, Diatone), (Part, Diatone))] -> [IntervalInfo]
-toIntervalInfos _ [] = []
-toIntervalInfos _ (_:[]) = []
-toIntervalInfos mo ((t1, (pa1, da1), (pb1, db1)):x@(t2, (pa2, da2), (pb2, db2)):xs) = (t2, motion, i da1 db1, i da2 db2, ctx) : toIntervalInfos mo (x:xs)
+toIntervalInfos :: Mode -> (Part, Part, [(Time, Diatone, Diatone)]) -> [IntervalInfo]
+toIntervalInfos _ (_, _, []) = []
+toIntervalInfos _ (_, _, (_:[])) = []
+toIntervalInfos mo (pa, pb, (t1, da1, db1):x@(t2, da2, db2):xs) = (t2, motion, i da1 db1, i da2 db2, ctx) : toIntervalInfos mo (pa, pb, (x:xs))
 	where
 		i = diatonicInterval mo
-		ctx = ( (pa2, da1, da2), (pb2, db1, db2) )
+		ctx = ( (pa, da1, da2), (pb, db1, db2) )
 		motion = if cmpa == EQ && cmpb == EQ then Repeat else
 					if cmpa == cmpb then Similar else
 					if cmpa == EQ || cmpb == EQ then Oblique else Contrary
