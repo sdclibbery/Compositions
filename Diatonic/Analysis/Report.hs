@@ -10,4 +10,4 @@ import Diatonic.Analysis.Deconstruct
 data Source = Harmony Int | CounterPoint Int deriving (Eq, Ord, Show)
 
 -- |One analysis result: an error or warning
-data Result = Warning Time Source String | Error Time Source String deriving (Eq, Ord, Show)
+data Result = Warning [Part] Time Source String | Error [Part] Time Source String deriving (Eq, Ord, Show)

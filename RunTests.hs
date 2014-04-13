@@ -7,11 +7,6 @@ import qualified Diatonic.Analysis.MelodyTests
 import qualified Diatonic.Analysis.HarmonyTests
 
 {- TODO:
-* Add part odentification
- * In Music as annotation if possible
- * Through into all the analysis
- * And then into all the rules
- * Through into the error/warning reports
 * More harmonic analysis rules...
 -}
 

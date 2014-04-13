@@ -14,24 +14,26 @@ import Diatonic.Analysis.Deconstruct
 import Diatonic.Analysis.Report
 
 -- |Provide a harmonic analysis of some music
-analyseMusic :: Mode -> Music Diatone -> [Result]
+analyseMusic :: Mode -> [Sequence Diatone] -> [Result]
 analyseMusic mo = foldr ((++) . analyseSequences mo) []
 					. map (toIntervalInfos mo)
 					. map correlateSequences
 					. allPairs
-					. musicToSequences
 
 -- Helpers
 
 -- Section 96 in Prouts Harmony
 -- Consequtive unisons are bad
 ruleS96 :: Mode -> IntervalInfo -> [Result]
-ruleS96 mo (t, Repeat, _, _) = [] -- Repeated octaves or unsions are fine
-ruleS96 mo (t, m, MkInterval _ Unison, MkInterval _ Unison) = [Error t (Harmony 96) $ "Consecutive unisons"]
-ruleS96 mo (t, m, MkInterval _ Octave, MkInterval _ Octave) = [Error t (Harmony 96) $ "Consecutive octaves"]
-ruleS96 mo (t, m, i0, i1) = []
+ruleS96 mo (t, Repeat, _, _, _) = [] -- Repeated octaves or unsions are fine
+ruleS96 mo (t, m, MkInterval _ Unison, MkInterval _ Unison, ctx) = [Error (parts ctx) t (Harmony 96) $ "Consecutive unisons"]
+ruleS96 mo (t, m, MkInterval _ Octave, MkInterval _ Octave, ctx) = [Error (parts ctx) t (Harmony 96) $ "Consecutive octaves"]
+ruleS96 _ _ = []
 
 -- !! rule98 says that if the ENTIRE sequence overlap is in octaves or unsions, then its allowed...
+
+parts :: Context -> [Part]
+parts ((p1,_,_), (p2,_,_)) = [p1, p2]
 
 -- Apply the rules to analyse the harmonic relation between two sequences
 
@@ -43,14 +45,18 @@ analyseSequences mo = foldr rules []
 
 data Motion = Repeat | Similar | Oblique | Contrary deriving (Show, Eq)
 
-type IntervalInfo = ( Time, Motion, Interval, Interval )
+type PartContext = (Part, Diatone, Diatone)
+type Context = (PartContext, PartContext)
 
-toIntervalInfos :: Mode -> [(Time, Diatone, Diatone)] -> [IntervalInfo]
+type IntervalInfo = ( Time, Motion, Interval, Interval, Context )
+
+toIntervalInfos :: Mode -> [(Time, (Part, Diatone), (Part, Diatone))] -> [IntervalInfo]
 toIntervalInfos _ [] = []
 toIntervalInfos _ (_:[]) = []
-toIntervalInfos mo ((t1, da1, db1):x@(t2, da2, db2):xs) = (t2, motion, i da1 db1, i da2 db2) : toIntervalInfos mo (x:xs)
+toIntervalInfos mo ((t1, (pa1, da1), (pb1, db1)):x@(t2, (pa2, da2), (pb2, db2)):xs) = (t2, motion, i da1 db1, i da2 db2, ctx) : toIntervalInfos mo (x:xs)
 	where
 		i = diatonicInterval mo
+		ctx = ( (pa2, da1, da2), (pb2, db1, db2) )
 		motion = if cmpa == EQ && cmpb == EQ then Repeat else
 					if cmpa == cmpb then Similar else
 					if cmpa == EQ || cmpb == EQ then Oblique else Contrary

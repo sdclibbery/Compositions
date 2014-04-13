@@ -12,15 +12,18 @@ import Diatonic.Interval
 -- |Define time within some music
 type Time = Rational
 
+-- |Identify one part in harmonic music
+data Part = Bass | Tenor | Alto | Treble deriving (Show, Eq, Ord, Enum)
+
 -- |A thing that happens at a certain time
-data Temporal a = Temporal Time a deriving (Show, Eq, Ord)
+data Temporal a = Temporal Part Time a deriving (Show, Eq, Ord)
 
 
 -- |An event that lasts for a certain duration
 type Event a = (Dur, a)
 
--- |A musical part: sequential music without any parallel constructors
-type Part a = Temporal (Music a)
+-- |A musical fragment: sequential music without any parallel constructors
+type Monophonic a = Temporal (Music a)
 
 -- |Line of musical primitives
 type Line a = Temporal [Primitive a]
@@ -28,51 +31,63 @@ type Line a = Temporal [Primitive a]
 -- |A sequence of events starting at a certain time
 type Sequence a = Temporal [Event a]
 
+-- |A Musical part
+type MusicPart a = (Part, Music a)
+
 
 -- |Convert a general Music into a list of Sequences, which are monophonic and continuous
 musicToSequences :: Music a -> [Sequence a]
-musicToSequences = map lineToSequence . concat . map splitOnRests . map flatten . monophonicParts 0
+musicToSequences = processSequences . monophonics 0 Alto
+
+-- |Convert a set of musical parts into a set of monophonic sequences suitable for analysis.
+-- |The lowest part must be Bass and the top most Treble, not matter how many parts there are.
+partsToSequences :: [MusicPart a] -> [Sequence a]
+partsToSequences = concat . map processSequences . map (uncurry (monophonics 0))
 
 -- |Correlate two sequences, giving a list of the overlapping items and when they occur
-correlateSequences :: (Sequence a, Sequence a) -> [(Time, a, a)]
-correlateSequences (Temporal _ [], Temporal _ _) = []
-correlateSequences (Temporal _ _, Temporal _ []) = []
-correlateSequences (Temporal t1 (e1:es1), Temporal t2 (e2:es2)) = if t1 < t2 then correlate t1 e1 es1 t2 e2 es2 else correlate t2 e2 es2 t1 e1 es1
+correlateSequences :: (Sequence a, Sequence a) -> [(Time, (Part, a), (Part, a))]
+correlateSequences (Temporal _ _ [], Temporal _ _ _) = []
+correlateSequences (Temporal _ _ _, Temporal _ _ []) = []
+correlateSequences (Temporal p1 t1 (e1:es1), Temporal p2 t2 (e2:es2)) = if t1 < t2 then correlate p1 t1 e1 es1 p2 t2 e2 es2 else correlate p2 t2 e2 es2 p1 t1 e1 es1
     where
-        correlate tl elo@(dl, xl) esl th eh@(dh, xh) esh = correlation ++ correlateSequences (truncatedlo, truncatedhi)
+        correlate pl tl (dl, xl) esl ph th eh@(dh, xh) esh = correlation ++ correlateSequences (truncatedlo, truncatedhi)
             where
-                correlation = if overlap then [(th, xl, xh)] else []
+                correlation = if overlap then [(th, (pl, xl), (ph, xh))] else []
                 overlap = tl + dl > th
-                truncatedlo = if tl + dl <= th + dh then Temporal (tl+dl) esl else Temporal th ((dl-th+tl, xl):esl)
-                truncatedhi = if tl + dl <= th + dh then Temporal th (eh:esh) else Temporal (th+dh) esh
+                truncatedlo = if tl + dl <= th + dh then Temporal pl (tl+dl) esl else Temporal pl th ((dl-th+tl, xl):esl)
+                truncatedhi = if tl + dl <= th + dh then Temporal ph th (eh:esh) else Temporal ph (th+dh) esh
 
--- Split some music into a list of monophonic parts
-monophonicParts :: Time -> Music a -> [Part a]
-monophonicParts t (m1 :=: m2) = monophonicParts t m1 ++ monophonicParts t m2
-monophonicParts t (m1 :+: m2) = monophonicParts t m1 `combine` monophonicParts (t + dur m1) m2
+
+processSequences :: [Monophonic a] -> [Sequence a]
+processSequences = map lineToSequence . concat . map splitOnRests . map flatten
+
+-- Split some music into a list of monophonic sections
+monophonics :: Time -> Part -> Music a -> [Monophonic a]
+monophonics t p (m1 :=: m2) = monophonics t p m1 ++ monophonics t p m2
+monophonics t p (m1 :+: m2) = monophonics t p m1 `combine` monophonics (t + dur m1) p m2
   where
-    combine [(Temporal t1 m1)] [(Temporal t2 m2)] = [(Temporal t1 $ m1 :+: m2)]
+    combine [(Temporal p1 t1 m1)] [(Temporal p2 t2 m2)] = [(Temporal p1 t1 $ m1 :+: m2)]
     combine s1 s2 = s1 ++ s2
-monophonicParts t m = [(Temporal t m)]
+monophonics t p m = [(Temporal p t m)]
 
--- Flatten a Part into a Line: a list of music primitives
-flatten :: Part a -> Line a
-flatten (Temporal t (Prim p)) = (Temporal t [p])
-flatten (Temporal t (m1 :+: m2)) = (flatten (Temporal t m1)) `concatLines` (flatten (Temporal t m2))
+-- Flatten a Monophonic into a Line: a list of music primitives
+flatten :: Monophonic a -> Line a
+flatten (Temporal pt t (Prim p)) = (Temporal pt t [p])
+flatten (Temporal pt t (m1 :+: m2)) = (flatten (Temporal pt t m1)) `concatLines` (flatten (Temporal pt t m2))
 	where
-		concatLines l1 l2 = (Temporal t $ prims l1 ++ prims l2)
-		prims (Temporal _ ps) = ps
-flatten (Temporal t (m1 :=: m2)) = error "Oops, flatten can only be used with Music that is already monophonic"
+		concatLines l1 l2 = (Temporal pt t $ prims l1 ++ prims l2)
+		prims (Temporal _ _ ps) = ps
+flatten (Temporal pt t (m1 :=: m2)) = error "Oops, flatten can only be used with Music that is already monophonic"
 
 -- Split a Line up on rests
 splitOnRests :: Line a -> [Line a]
-splitOnRests (Temporal t prims) = case span (not.isRest) prims of
+splitOnRests (Temporal pt t prims) = case span (not.isRest) prims of
     ([], []) -> []
-    (ps, []) -> [(Temporal t ps)]
+    (ps, []) -> [(Temporal pt t ps)]
     ([], pps) -> splitOnRests (remainder t pps)
-    (ps, pps) -> [(Temporal t ps)] ++ splitOnRests (remainder (t + durNotes ps) pps)
+    (ps, pps) -> [(Temporal pt t ps)] ++ splitOnRests (remainder (t + durNotes ps) pps)
   where
-    remainder t pps = Temporal (t + durRest (head pps)) $ tail pps
+    remainder t pps = Temporal pt (t + durRest (head pps)) $ tail pps
     durNotes = foldr (\(Note d _) a -> a + d) 0
     durRest (Rest d) = d
     isRest (Rest _) = True
@@ -80,4 +95,4 @@ splitOnRests (Temporal t prims) = case span (not.isRest) prims of
 
 -- Transform a Line with no rests in into a Sequence of notes
 lineToSequence :: Line a -> Sequence a
-lineToSequence (Temporal t ps) = (Temporal t $ map (\(Note d n) -> (d, n)) ps)
+lineToSequence (Temporal pt t ps) = (Temporal pt t $ map (\(Note d n) -> (d, n)) ps)
