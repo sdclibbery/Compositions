@@ -18,6 +18,9 @@ data Part = Bass | Tenor | Alto | Treble deriving (Show, Eq, Ord, Enum)
 -- |A thing that happens at a certain time
 data Temporal a = Temporal Part Time a deriving (Show, Eq, Ord)
 
+-- |Indicates whether two sequences have the same arrangement of events (but not necessarily the same event contents)
+data Fit = Exact | Mismatch deriving (Show, Eq)
+
 
 -- |An event that lasts for a certain duration
 type Event a = (Dur, a)
@@ -45,18 +48,20 @@ partsToSequences :: [MusicPart a] -> [Sequence a]
 partsToSequences = concat . map processSequences . map (uncurry (monophonics 0))
 
 -- |Correlate two sequences, giving a list of the overlapping items and when they occur
-correlateSequences :: (Sequence a, Sequence a) -> (Part, Part, [(Time, a, a)])
-correlateSequences (Temporal p1 _ [], Temporal p2 _ _) = (p1, p2, [])
-correlateSequences (Temporal p1 _ _, Temporal p2 _ []) = (p1, p2, [])
+correlateSequences :: (Sequence a, Sequence a) -> (Part, Part, [(Time, a, a)], Fit)
+correlateSequences (Temporal p1 _ [], Temporal p2 _ []) = (p1, p2, [], Exact)
+correlateSequences (Temporal p1 _ [], Temporal p2 _ _) = (p1, p2, [], Mismatch)
+correlateSequences (Temporal p1 _ _, Temporal p2 _ []) = (p1, p2, [], Mismatch)
 correlateSequences (Temporal p1 t1 (e1:es1), Temporal p2 t2 (e2:es2)) = if t1 < t2 then correlate p1 t1 e1 es1 p2 t2 e2 es2 else correlate p2 t2 e2 es2 p1 t1 e1 es1
     where
         correlate pl tl (dl, xl) esl ph th eh@(dh, xh) esh = correlation `combine` correlateSequences (truncatedlo, truncatedhi)
             where
-                correlation = if overlap then (pl, ph, [(th, xl, xh)]) else (pl, ph, [])
+                correlation = if overlap then (pl, ph, [(th, xl, xh)], fit) else (pl, ph, [], Mismatch)
                 overlap = tl + dl > th
                 truncatedlo = if tl + dl <= th + dh then Temporal pl (tl+dl) esl else Temporal pl th ((dl-th+tl, xl):esl)
-                truncatedhi = if tl + dl <= th + dh then Temporal ph th (eh:esh) else Temporal ph (th+dh) esh
-                combine (p1, p2, es1) (_, _, es2) = (p1, p2, es1 ++ es2)
+                truncatedhi = if tl + dl < th + dh then Temporal ph th (eh:esh) else Temporal ph (th+dh) esh
+                fit = if t1 == t2 && dl == dh then Exact else Mismatch
+                combine (p1, p2, es1, o1) (_, _, es2, o2) = (p1, p2, es1 ++ es2, if o1 == Mismatch then o1 else o2)
 
 
 -- Process monophonic music sections into Sequences (lists of notes)
