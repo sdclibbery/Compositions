@@ -25,7 +25,7 @@ import Data.Maybe
 data Source = Harmony Int | CounterPoint Int deriving (Eq, Ord, Show)
 
 -- |One analysis result: an error or warning
-data Result = Warning [Integer] Time Source String | Error [Integer] Time Source String deriving (Eq, Ord, Show)
+data Result = Warning [Integer] Span Source String | Error [Integer] Span Source String deriving (Eq, Ord, Show)
 
 -- |Analyse a score, applying the melodic analysis rules
 analyse :: Score BasicNote -> [Result]
@@ -42,10 +42,11 @@ ruleH89 (l:ls, r:rs)
   | number i == second        = Nothing
 --  | intType i == Diminished   = Nothing -- Leave for rule S90
 --  | intType i == Augmented    = Nothing -- Leave for rule S91
-  | otherwise                 =  Just $ Error [part] (onset l) (Harmony 89) $ "Dissonance " ++ show i
+  | otherwise                 =  Just $ Error [part] s (Harmony 89) $ "Dissonance " ++ show i
     where
         i = (__getPitch l) .-. (__getPitch r)
         part = fromIntegral $ getPart $ getNoteValue l
+        s = onset r <-> offset l
 
 -- Helpers
 

@@ -21,12 +21,12 @@ testParts = TestLabel "parts" $ TestList
     ] where
         test e s = (show s) ~: e ~=? (analyse s)
         part p = setPart p $ asScore $ scat [c,b]^/4
-        err p = Error [p] (1/4) (Harmony 89) "Dissonance _M7"
+        err p = Error [p] (0 <-> (1/2)) (Harmony 89) "Dissonance _M7"
 
 testRuleH89 = TestLabel "ruleH89" $ TestList
-    [ test []                                                   $ [c..c']
-    , test [Error [0] (1/4) (Harmony 89) "Dissonance _M7"]      $ [c,b]
-    , test [Error [0] (3/4) (Harmony 89) "Dissonance _M7"]      $ [a_,b_,c,b]
+    [ test []                                                           $ [c..c']
+    , test [Error [0] (0 <-> (1/2)) (Harmony 89) "Dissonance _M7"]      $ [c,b]
+    , test [Error [0] ((1/2) <-> 1) (Harmony 89) "Dissonance _M7"]      $ [a_,b_,c,b]
     -- Leaving dim/aug for the next rule...
     ] where
         test e s = (show s) ~: e ~=? (analyse $ asScore $ scat s^/4)
