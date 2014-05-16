@@ -3,8 +3,7 @@ import qualified Analysis.MelodyTests
 
 {- TODO:
 * Initial Melody test
-* Submit
- * analyseRule functions should not have to guard against the zipper end; mapZipper should do this...
+ x analyseRule functions should not have to guard against the zipper end; mapZipper should do this...
  * DO move to another zipper now!
  * Move Result etc types out into own file..?
 * Rest of melody tests

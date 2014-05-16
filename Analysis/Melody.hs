@@ -46,7 +46,6 @@ analyse = Prelude.concat . map analysePart . splitPhrases . map zipper . extract
 -- Analysis of Music according to Section 89 in Prouts Harmony
 -- Any dissonance other than a second is bad
 ruleH89 :: Zipper (Note BasicNote) -> Maybe Result
-ruleH89 (_, []) = Nothing
 ruleH89 (l:ls, r:rs)
   | isConsonance i            = Nothing
   | number i == second        = Nothing
@@ -65,19 +64,18 @@ zipper s =  (toList $ mapWithSpan (=:) s, [])
 
 type Zipper a = ([a], [a]) -- (next, previous)
 
-next :: Zipper a -> Maybe (Zipper a)
-next ([], _) = Nothing
-next (l:ls, rs) = Just (ls, l:rs)
+next :: Zipper a -> Zipper a
+next (l:ls, rs) = (ls, l:rs)
 
 splitZipper :: (a -> a -> Bool) -> Zipper a -> [Zipper a]
 splitZipper _ ([], rs) = [(reverse rs, [])]
-splitZipper p z@(_, []) = splitZipper p $ fromJust $ next z
-splitZipper p z@(l:ls, r:rs) = if p l r then (reverse (r:rs), []) : splitZipper p (l:ls, []) else splitZipper p $ fromJust $ next z
+splitZipper p z@(_, []) = splitZipper p $ next z
+splitZipper p z@(l:ls, r:rs) = if p l r then (reverse (r:rs), []) : splitZipper p (l:ls, []) else splitZipper p $ next z
 
 mapZipper :: (Zipper a -> b) -> Zipper a -> [b]
-mapZipper f z = let n = next z in
-  if isNothing n then []
-  else (f z) : (mapZipper f $ fromJust n)        
+mapZipper _ z@([], _) = []
+mapZipper f z@(_, []) = mapZipper f $ next z
+mapZipper f z = (f z) : (mapZipper f $ next z)
 
 instance HasGetPitch (ChordT BasicPitch) where
     __getPitch c = case getChord c of
