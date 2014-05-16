@@ -6,12 +6,13 @@ module Analysis.MelodyTests (
 import Test.HUnit
 import Analysis.Melody
 import Music.Prelude.Basic
-import Control.Lens
+import Control.Lens hiding ((|>))
 import Data.Foldable
 import Data.Ratio
 
 tests = TestLabel "Melody" $ TestList
     [ testParts
+    , testRests
     , testRuleH89
     ]
 
@@ -22,6 +23,13 @@ testParts = TestLabel "parts" $ TestList
         test e s = (show s) ~: e ~=? (analyse s)
         part p = setPart p $ asScore $ scat [c,b]^/4
         err p = Error [p] (0 <-> (1/2)) (Harmony 89) "Dissonance _M7"
+
+testRests = TestLabel "rests" $ TestList
+    [ test [err 0, err (3/2)]               $ removeRests $ scat [c,b]^/4 |> rest |> scat [c,b]^/4
+    , test [err 0, err (3/2), err 3]    $ removeRests $ scat [c,b]^/4 |> rest |> scat [c,b]^/4 |> rest |> scat [c,b]^/4
+    ] where
+        test e s = (show s) ~: e ~=? (analyse s)
+        err t = Error [0] (t >-> (1/2)) (Harmony 89) "Dissonance _M7"
 
 testRuleH89 = TestLabel "ruleH89" $ TestList
     [ test []                                                           $ [c..c']
