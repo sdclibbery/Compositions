@@ -21,6 +21,7 @@ import Control.Lens
 import Data.Foldable
 import Data.Maybe
 import Debug.Trace
+import qualified Data.List.Zipper as Z
 
 
 -- |Define the source for an error or warning within Ebeneezer Prouts books
@@ -41,41 +42,39 @@ analyse = Prelude.concat . map analysePart . splitPhrases . map zipper . extract
   where
     splitPhrases = Prelude.concat . map (splitZipper disjoint)
     disjoint t u = offset t < onset u || offset u < onset t
-    analysePart = catMaybes . mapZipper ruleH89
+    analysePart = catMaybes . mapPairs ruleH89
 
 -- Analysis of Music according to Section 89 in Prouts Harmony
 -- Any dissonance other than a second is bad
-ruleH89 :: Zipper (Note BasicNote) -> Maybe Result
-ruleH89 (l:ls, r:rs)
+ruleH89 :: Z.Zipper (Note BasicNote) -> Maybe Result
+ruleH89 z
   | isConsonance i            = Nothing
   | number i == second        = Nothing
---  | intType i == Diminished   = Nothing -- Leave for rule S90
---  | intType i == Augmented    = Nothing -- Leave for rule S91
+--  | intType i == Diminished   = Nothing -- Leave for rule 90
+--  | intType i == Augmented    = Nothing -- Leave for rule 91
   | otherwise                 =  Just $ Error [part] s (Harmony 89) $ "Dissonance " ++ show i
     where
-        i = (__getPitch l) .-. (__getPitch r)
-        part = getPart $ getNoteValue l
-        s = onset r <-> offset l
+        l = Z.cursor z
+        r = Z.cursor $ Z.right z
+        i = (__getPitch r) .-. (__getPitch l)
+        part = getPart $ getNoteValue r
+        s = onset l <-> offset r
 
 -- Helpers
 
-zipper :: Score BasicNote -> Zipper (Note BasicNote)
-zipper s =  (toList $ mapWithSpan (=:) s, [])
+zipper :: Score BasicNote -> Z.Zipper (Note BasicNote)
+zipper = Z.fromList . toList . mapWithSpan (=:)
 
-type Zipper a = ([a], [a]) -- (next, previous)
+splitZipper :: (a -> a -> Bool) -> Z.Zipper a -> [Z.Zipper a]
+splitZipper p z@(Z.Zip ls rs)
+  | Z.endp z = [Z.fromList $ reverse ls]
+  | Z.beginp z = splitZipper p $ Z.right z
+  | otherwise = if p (head ls) (head rs) then (Z.fromList $ reverse ls) : splitZipper p (Z.fromList rs) else splitZipper p $ Z.right z
 
-next :: Zipper a -> Zipper a
-next (l:ls, rs) = (ls, l:rs)
-
-splitZipper :: (a -> a -> Bool) -> Zipper a -> [Zipper a]
-splitZipper _ ([], rs) = [(reverse rs, [])]
-splitZipper p z@(_, []) = splitZipper p $ next z
-splitZipper p z@(l:ls, r:rs) = if p l r then (reverse (r:rs), []) : splitZipper p (l:ls, []) else splitZipper p $ next z
-
-mapZipper :: (Zipper a -> b) -> Zipper a -> [b]
-mapZipper _ z@([], _) = []
-mapZipper f z@(_, []) = mapZipper f $ next z
-mapZipper f z = (f z) : (mapZipper f $ next z)
+mapPairs :: (Z.Zipper a -> b) -> Z.Zipper a -> [b]
+mapPairs f = Z.foldrz foldit []
+  where
+    foldit z rs = if Z.endp $ Z.right z then rs else (f z) : rs
 
 instance HasGetPitch (ChordT BasicPitch) where
     __getPitch c = case getChord c of
