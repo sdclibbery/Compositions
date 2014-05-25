@@ -22,7 +22,8 @@ import Data.Foldable
 import Data.Maybe
 import Debug.Trace
 import qualified Data.List.Zipper as Z
-
+import qualified Data.List as List
+import Data.Ord
 
 -- |Define the source for an error or warning within Ebeneezer Prouts books
 data Source =
@@ -38,8 +39,9 @@ data Result =
 
 -- |Analyse a score, applying the melodic analysis rules
 analyse :: Score BasicNote -> [Result]
-analyse = Prelude.concat . map analysePart . splitPhrases . map zipper . extractParts
+analyse = Prelude.concat . map analysePart . splitPhrases . map zipper . splitVoices
   where
+    splitVoices = Prelude.concat . map separateVoices . extractParts
     splitPhrases = Prelude.concat . map (splitZipper disjoint)
     disjoint t u = offset t < onset u || offset u < onset t
     analysePart = catMaybes . mapPairs ruleH89
