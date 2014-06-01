@@ -9,6 +9,7 @@ import Music.Prelude.Basic
 import Control.Lens hiding ((|>))
 import Data.Foldable
 import Data.Ratio
+import Analysis.Result
 
 tests = TestLabel "Melody" $ TestList
     [ testParts

@@ -11,8 +11,6 @@ The analytic rules are according to Ebeneezer Prouts books 'Harmony' and 'Counte
 -}
 
 module Analysis.Melody (
-        Source(..),
-        Result(..),
         analyse
     ) where
 import Music.Prelude.Basic
@@ -20,22 +18,9 @@ import Music.Score.Note
 import Control.Lens
 import Data.Foldable
 import Data.Maybe
-import Debug.Trace
 import qualified Data.List.Zipper as Z
-import qualified Data.List as List
 import Data.Ord
-
--- |Define the source for an error or warning within Ebeneezer Prouts books
-data Source =
-    Harmony Int
-  | CounterPoint Int
-  deriving (Eq, Ord, Show)
-
--- |One analysis result: an error or warning
-data Result =
-    Warning [BasicPart] Span Source String
-  | Error [BasicPart] Span Source String
-  deriving (Eq, Ord, Show)
+import Analysis.Result
 
 -- |Analyse a score, applying the melodic analysis rules
 analyse :: Score BasicNote -> [Result]
