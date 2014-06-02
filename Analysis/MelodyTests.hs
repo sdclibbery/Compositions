@@ -17,6 +17,7 @@ tests = TestLabel "Melody" $ TestList
     , testOrder
     , testPCat
     , testRuleH89
+    , testRuleH90
     ]
 
 testParts = TestLabel "parts" $ TestList
@@ -53,6 +54,12 @@ testRuleH89 = TestLabel "ruleH89" $ TestList
     , test [Error [0] (0 <-> (1/2)) (Harmony 89) "Dissonance _M7"]      $ [c,b]
     , test [Error [0] ((1/2) <-> 1) (Harmony 89) "Dissonance _M7"]      $ [a_,b_,c,b]
     -- Leaving dim/aug for the next rule...
+    ] where
+        test e s = (show s) ~: e ~=? (analyse $ asScore $ scat s^/4)
+
+testRuleH90 = TestLabel "ruleH90" $ TestList
+    [ test [Error [0] (0 <-> (1/2)) (Harmony 90) "Dissonance d5"]      $ [b, f']
+    -- !! NEEDS REST OF TESTS :-)
     ] where
         test e s = (show s) ~: e ~=? (analyse $ asScore $ scat s^/4)
 

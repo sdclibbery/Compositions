@@ -21,33 +21,48 @@ import Data.Maybe
 import qualified Data.List.Zipper as Z
 import Data.Ord
 import Analysis.Result
+import Control.Applicative
 
 -- |Analyse a score, applying the melodic analysis rules
 analyse :: Score BasicNote -> [Result]
-analyse = Prelude.concat . map analysePart . splitPhrases . map zipper . splitVoices
+analyse = analyseParts . splitPhrases . map zipper . splitVoices
   where
     splitVoices = Prelude.concat . map separateVoices . extractParts
     splitPhrases = Prelude.concat . map (splitZipper disjoint)
     disjoint t u = offset t < onset u || offset u < onset t
-    analysePart = catMaybes . mapPairs ruleH89
+    analyseParts ps = catMaybes $ Prelude.concat $ mapPairs <$> rules <*> ps
+    rules = [ruleH89, ruleH90]
 
 -- Analysis of Music according to Section 89 in Prouts Harmony
 -- Any dissonance other than a second is bad
 ruleH89 :: Z.Zipper (Note BasicNote) -> Maybe Result
 ruleH89 z
+  | isStep i                  = Nothing
   | isConsonance i            = Nothing
-  | number i == second        = Nothing
---  | intType i == Diminished   = Nothing -- Leave for rule 90
---  | intType i == Augmented    = Nothing -- Leave for rule 91
-  | otherwise                 =  Just $ Error [part] s (Harmony 89) $ "Dissonance " ++ show i
+  | isDiminished i            = Nothing -- Leave for rule 90
+  | isAugmented i             = Nothing -- Leave for rule 91
+  | otherwise                 = Just $ Error [part] s (Harmony 89) $ "Dissonance " ++ show i
+    where
+      (i, part, s) = getBasicInfo z
+
+-- Analysis of Music according to Section 90 in Prouts Harmony
+-- A diminished interval must be resolved correctly
+ruleH90 :: Z.Zipper (Note BasicNote) -> Maybe Result
+ruleH90 z
+  | isDiminished i            = Just $ Error [part] s (Harmony 90) $ "Dissonance " ++ show i
+  | otherwise                 = Nothing
+    where
+      (i, part, s) = getBasicInfo z
+
+-- Helpers
+
+getBasicInfo z = (i, part, s)
     where
         l = Z.cursor z
         r = Z.cursor $ Z.right z
         i = (__getPitch r) .-. (__getPitch l)
         part = getPart $ getNoteValue r
         s = onset l <-> offset r
-
--- Helpers
 
 zipper :: Score BasicNote -> Z.Zipper (Note BasicNote)
 zipper = Z.fromList . toList . mapWithSpan (=:)
