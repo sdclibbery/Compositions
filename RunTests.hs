@@ -11,7 +11,6 @@ x Rewrite 'analysePart' neater
 
 -}
 
-main = do
-    runTestTT $ TestList
+main = runTestTT $ TestList
         [ Analysis.MelodyTests.tests
         ]

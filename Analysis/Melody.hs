@@ -27,8 +27,8 @@ import Control.Applicative
 analyse :: Score BasicNote -> [Result]
 analyse = analyseParts . splitPhrases . map zipper . splitVoices
   where
-    splitVoices = Prelude.concat . map separateVoices . extractParts
-    splitPhrases = Prelude.concat . map (splitZipper disjoint)
+    splitVoices = Prelude.concatMap separateVoices . extractParts
+    splitPhrases = Prelude.concatMap (splitZipper disjoint)
     disjoint t u = offset t < onset u || offset u < onset t
     analyseParts ps = catMaybes $ Prelude.concat $ mapPairs <$> rules <*> ps
     rules = [ruleH89, ruleH90]
@@ -60,7 +60,7 @@ getBasicInfo z = (i, part, s)
     where
         l = Z.cursor z
         r = Z.cursor $ Z.right z
-        i = (__getPitch r) .-. (__getPitch l)
+        i = __getPitch r .-. __getPitch l
         part = getPart $ getNoteValue r
         s = onset l <-> offset r
 
@@ -71,12 +71,12 @@ splitZipper :: (a -> a -> Bool) -> Z.Zipper a -> [Z.Zipper a]
 splitZipper p z@(Z.Zip ls rs)
   | Z.endp z = [Z.fromList $ reverse ls]
   | Z.beginp z = splitZipper p $ Z.right z
-  | otherwise = if p (head ls) (head rs) then (Z.fromList $ reverse ls) : splitZipper p (Z.fromList rs) else splitZipper p $ Z.right z
+  | otherwise = if p (head ls) (head rs) then Z.fromList (reverse ls) : splitZipper p (Z.fromList rs) else splitZipper p $ Z.right z
 
 mapPairs :: (Z.Zipper a -> b) -> Z.Zipper a -> [b]
 mapPairs f = Z.foldrz foldit []
   where
-    foldit z rs = if Z.endp $ Z.right z then rs else (f z) : rs
+    foldit z rs = if Z.endp $ Z.right z then rs else f z : rs
 
 instance HasGetPitch (ChordT BasicPitch) where
     __getPitch c = case getChord c of
