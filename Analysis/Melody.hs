@@ -35,7 +35,7 @@ analyse = analyseParts . splitPhrases . map zipper . splitVoices
 
 -- Analysis of Music according to Section 89 in Prouts Harmony
 -- Any dissonance other than a second is bad
-ruleH89 :: Z.Zipper (Note BasicNote) -> Maybe Result
+ruleH89 :: Z.Zipper ANote -> Maybe Result
 ruleH89 z
   | isStep i                  = Nothing
   | isConsonance i            = Nothing
@@ -47,24 +47,47 @@ ruleH89 z
 
 -- Analysis of Music according to Section 90 in Prouts Harmony
 -- A diminished interval must be resolved correctly
-ruleH90 :: Z.Zipper (Note BasicNote) -> Maybe Result
+ruleH90 :: Z.Zipper ANote -> Maybe Result
 ruleH90 z
-  | isDiminished i            = Just $ Error [part] s (Harmony 90) $ "Dissonance " ++ show i
-  | otherwise                 = Nothing
+  | isDiminished i    = evaluate
+  | otherwise         = Nothing
     where
       (i, part, s) = getBasicInfo z
+      (l2, l, r, r2) = getNotes z
+      evaluate | isNothing r2 = Just $ Warning [part] s (Harmony 90) $ "Diminished " ++ show i
+               | not $ isInInterval l r (fromJust r2) = Just $ Error [part] s (Harmony 90) $ "Outside Diminished " ++ show i
+               | isResolution l r (fromJust r2) = Nothing
+               | otherwise = Just $ Error [part] s (Harmony 90) $ "Unresolved Diminished " ++ show i
+      isResolution a1 a2 a = (==) p (if p2 > p1 then p2 .-^ m2 else p2 .+^ m2) -- Resolution to a diminished is a semitone in each side
+        where
+          [p1, p2, p] = fmap __getPitch [a1, a2, a]
 
 -- Helpers
 
-getBasicInfo z = (i, part, s)
-    where
+type ANote = (Note BasicNote)
+
+isInInterval :: ANote -> ANote -> ANote -> Bool
+isInInterval a1 a2 a = p > min p1 p2 && p < max p1 p2
+  where
+    [p1, p2, p] = fmap __getPitch [a1, a2, a]
+
+getNotes :: Z.Zipper ANote -> (Maybe ANote, ANote, ANote, Maybe ANote)
+getNotes z = (l2, l, r, r2)
+  where
+        l2 = Z.safeCursor $ Z.left z
         l = Z.cursor z
         r = Z.cursor $ Z.right z
-        i = __getPitch r .-. __getPitch l
-        part = getPart $ getNoteValue r
-        s = onset l <-> offset r
+        r2 = Z.safeCursor $ Z.right $ Z.right z
 
-zipper :: Score BasicNote -> Z.Zipper (Note BasicNote)
+getBasicInfo :: Z.Zipper ANote -> (Interval BasicPitch, BasicPart, Span)
+getBasicInfo z = (i, part, s)
+  where
+    (_, l, r, _) = getNotes z
+    i = __getPitch r .-. __getPitch l
+    part = getPart $ getNoteValue r
+    s = onset l <-> offset r
+
+zipper :: Score BasicNote -> Z.Zipper ANote
 zipper = Z.fromList . toList . mapWithSpan (=:)
 
 splitZipper :: (a -> a -> Bool) -> Z.Zipper a -> [Z.Zipper a]

@@ -53,13 +53,19 @@ testRuleH89 = TestLabel "ruleH89" $ TestList
     [ test []                                                           [c..c']
     , test [Error [0] (0 <-> (1/2)) (Harmony 89) "Dissonance _M7"]      [c,b]
     , test [Error [0] ((1/2) <-> 1) (Harmony 89) "Dissonance _M7"]      [a_,b_,c,b]
-    -- Leaving dim/aug for the next rule...
+    -- Leaving dim/aug for the next rules...
     ] where
         test e s = show s ~: e ~=? analyse (asScore $ scat s^/4)
 
 testRuleH90 = TestLabel "ruleH90" $ TestList
-    [ test [Error [0] (0 <-> (1/2)) (Harmony 90) "Dissonance d5"]      [b, f']
-    -- !! NEEDS REST OF TESTS :-)
+    [ test [Warning [0] (0 <-> (1/2)) (Harmony 90) "Diminished d5"]               [b, f']
+    , test [Error [0] (0 <-> (1/2)) (Harmony 90) "Unresolved Diminished d5"]      [b, f', c']
+    , test [Error [0] (0 <-> (1/2)) (Harmony 90) "Unresolved Diminished d5"]      [b, f', d']
+    , test []                                                                     [b, f', e']
+    , test []                                                                     [f', b, c']
+    , test [Error [0] (0 <-> (1/2)) (Harmony 90) "Unresolved Diminished -d5"]     [f', b, e']
+    , test [Error [0] (0 <-> (1/2)) (Harmony 90) "Outside Diminished d5"]         [b, f', a]
+    , test [Error [0] (0 <-> (1/2)) (Harmony 90) "Outside Diminished d5"]         [b, f', g']
     ] where
         test e s = show s ~: e ~=? analyse (asScore $ scat s^/4)
 
@@ -67,4 +73,18 @@ testRuleH90 = TestLabel "ruleH90" $ TestList
 
 instance Show (Score BasicNote) where
     show s = show $ map (view pitch') $ toList $ mapWithSpan (=:) s
+
+{- Test for an internal method
+testIsInInterval = TestLabel "isInInterval" $ TestList
+    [ test True                     (nc, ne, nd)
+    , test True                     (ne, nc, nd)
+    , test False                    (nc, ne, nc)
+    , test False                    (nc, nd, ne)
+    , test False                    (nd, ne, nc)
+    ] where
+        test e r@(n1, n2, n3) = show r ~: e ~=? isInInterval n1 n2 n3
+        nc = c::Note BasicNote
+        nd = d::Note BasicNote
+        ne = e::Note BasicNote
+-}
 
