@@ -4,7 +4,7 @@ import qualified Analysis.MelodyTests
 {- TODO:
 x Rewrite 'analysePart' neater
 * Rest of melody rules
- * 91...
+ * 92...
 * Investigate Zippers that can step up and down through parts as well as along melodies
 * Harmony tests 
 -}

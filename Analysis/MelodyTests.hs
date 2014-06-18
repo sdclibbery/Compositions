@@ -18,6 +18,7 @@ tests = TestLabel "Melody" $ TestList
     , testPCat
     , testRuleH89
     , testRuleH90
+    , testRuleH91
     ]
 
 testParts = TestLabel "parts" $ TestList
@@ -66,6 +67,12 @@ testRuleH90 = TestLabel "ruleH90" $ TestList
     , test [Error [0] (0 <-> (1/2)) (Harmony 90) "Unresolved Diminished -d5"]     [f', b, e']
     , test [Error [0] (0 <-> (1/2)) (Harmony 90) "Outside Diminished d5"]         [b, f', a]
     , test [Error [0] (0 <-> (1/2)) (Harmony 90) "Outside Diminished d5"]         [b, f', g']
+    ] where
+        test e s = show s ~: e ~=? analyse (asScore $ scat s^/4)
+
+testRuleH91 = TestLabel "ruleH91" $ TestList
+    [ test [Error [0] (0 <-> (1/2)) (Harmony 91) "Augmented _A4"]              [f, b]
+    , test []                                                                  [c, ds] -- Augmented second is OK 
     ] where
         test e s = show s ~: e ~=? analyse (asScore $ scat s^/4)
 

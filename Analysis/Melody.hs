@@ -31,7 +31,7 @@ analyse = analyseParts . splitPhrases . map zipper . splitVoices
     splitPhrases = Prelude.concatMap (splitZipper disjoint)
     disjoint t u = offset t < onset u || offset u < onset t
     analyseParts ps = catMaybes $ Prelude.concat $ mapPairs <$> rules <*> ps
-    rules = [ruleH89, ruleH90]
+    rules = [ruleH89, ruleH90, ruleH91]
 
 -- Analysis of Music according to Section 89 in Prouts Harmony
 -- Any dissonance other than a second is bad
@@ -61,6 +61,16 @@ ruleH90 z
       isResolution a1 a2 a = (==) p (if p2 > p1 then p2 .-^ m2 else p2 .+^ m2) -- Resolution to a diminished is a semitone in each side
         where
           [p1, p2, p] = fmap __getPitch [a1, a2, a]
+
+-- Analysis of Music according to Section 91 in Prouts Harmony
+-- An augmented interval is always bad (except augmented second)
+ruleH91 :: Z.Zipper ANote -> Maybe Result
+ruleH91 z
+  | isStep i           = Nothing
+  | isAugmented i     = Just $ Error [part] s (Harmony 91) $ "Augmented " ++ show i
+  | otherwise         = Nothing
+    where
+      (i, part, s) = getBasicInfo z
 
 -- Helpers
 
