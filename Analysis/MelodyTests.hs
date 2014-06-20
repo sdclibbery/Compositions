@@ -19,6 +19,7 @@ tests = TestLabel "Melody" $ TestList
     , testRuleH89
     , testRuleH90
     , testRuleH91
+    , testRuleH92
     ]
 
 testParts = TestLabel "parts" $ TestList
@@ -53,7 +54,7 @@ testPCat = TestLabel "pcat" $ TestList
 testRuleH89 = TestLabel "ruleH89" $ TestList
     [ test []                                                           [c..c']
     , test [Error [0] (0 <-> (1/2)) (Harmony 89) "Dissonance _M7"]      [c,b]
-    , test [Error [0] ((1/2) <-> 1) (Harmony 89) "Dissonance _M7"]      [a_,b_,c,b]
+    , test [Error [0] ((1/2) <-> 1) (Harmony 89) "Dissonance _M7"]      [a_,d,c,b]
     -- Leaving dim/aug for the next rules...
     ] where
         test e s = show s ~: e ~=? analyse (asScore $ scat s^/4)
@@ -72,7 +73,19 @@ testRuleH90 = TestLabel "ruleH90" $ TestList
 
 testRuleH91 = TestLabel "ruleH91" $ TestList
     [ test [Error [0] (0 <-> (1/2)) (Harmony 91) "Augmented _A4"]              [f, b]
-    , test []                                                                  [c, ds] -- Augmented second is OK 
+    , test []                                                                  [c, ds]
+    ] where
+        test e s = show s ~: e ~=? analyse (asScore $ scat s^/4)
+
+testRuleH92 = TestLabel "ruleH92" $ TestList
+    [ test []                                                                      [g, e, e', c']
+    , test []                                                                      [e, e']
+    , test []                                                                      [g, e, e']
+    , test []                                                                      [e, e', c']
+    , test [Error [0] ((1/4) <-> (3/4)) (Harmony 92) "Large Interval Approach"]    [d, e, e']
+    , test [Error [0] (0 <-> (1/2)) (Harmony 92) "Large Interval Leave"]           [e, e', g']
+    , test [Error [0] ((1/4) <-> (3/4)) (Harmony 92) "Large Interval Approach"]    [d, e, e', c']
+    , test [Error [0] ((1/4) <-> (3/4)) (Harmony 92) "Large Interval Leave"]       [g, e, e', g']
     ] where
         test e s = show s ~: e ~=? analyse (asScore $ scat s^/4)
 
