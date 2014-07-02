@@ -27,12 +27,12 @@ testParts = TestLabel "parts" $ TestList
     , test [err 0, err 1]           $ part 0 <> part 1
     ] where
         test e s = show s ~: e ~=? analyse s
-        part p = setPart p $ asScore $ scat [c,b]^/4
+        part p = asScore $ set parts' p $ scat [c,b]^/4
         err p = Error [p] (0 <-> (1/2)) (Harmony 89) "Dissonance _M7"
 
 testRests = TestLabel "rests" $ TestList
-    [ test [err 0, err (3/2)]               $ removeRests $ scat [c,b]^/4 |> rest |> scat [c,b]^/4
-    , test [err 0, err (3/2), err 3]    $ removeRests $ scat [c,b]^/4 |> rest |> scat [c,b]^/4 |> rest |> scat [c,b]^/4
+    [ test [err 0, err (3/2)]           $ mcatMaybes $ scat [c,b]^/4 |> rest |> scat [c,b]^/4
+    , test [err 0, err (3/2), err 3]    $ mcatMaybes $ scat [c,b]^/4 |> rest |> scat [c,b]^/4 |> rest |> scat [c,b]^/4
     ] where
         test e s = show s ~: e ~=? analyse s
         err t = Error [0] (t >-> (1/2)) (Harmony 89) "Dissonance _M7"
@@ -45,11 +45,10 @@ testOrder = TestLabel "order" $ TestList
         err = Error [0] (0 >-> 2) (Harmony 89) "Dissonance _M7"
 
 testPCat = TestLabel "pcat" $ TestList
-    [ test [err]                     $ asScore $ pcat [d_,c] |> pcat [e_,b]
-    , test [err]                     $ asScore $ pcat [c,d_] |> pcat [b,e_]
+    [ test []                     $ asScore $ pcat [d_,c] |> pcat [e_,b] -- Melodic analysis is only valid for monophonic voices; polyphonic voics are ignored
+    , test []                     $ asScore $ pcat [c,d_] |> pcat [b,e_]
     ] where
         test e s = show s ~: e ~=? analyse s
-        err = Error [0] (0 >-> 2) (Harmony 89) "Dissonance _M7"
 
 testRuleH89 = TestLabel "ruleH89" $ TestList
     [ test []                                                           [c..c']
@@ -92,7 +91,7 @@ testRuleH92 = TestLabel "ruleH92" $ TestList
 -- Helpers
 
 instance Show (Score BasicNote) where
-    show s = show $ map (view pitch') $ toList $ mapWithSpan (=:) s
+    show s = show $ map (! 0) $ toListOf pitches s
 
 {- Test for an internal method
 testIsInInterval = TestLabel "isInInterval" $ TestList

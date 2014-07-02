@@ -13,8 +13,8 @@ The analytic rules are according to Ebeneezer Prouts books 'Harmony' and 'Counte
 module Analysis.Melody (
         analyse
     ) where
-import Music.Prelude.Basic
-import Music.Score.Note
+import Music.Prelude.Basic as M
+import Music.Score as S
 import Control.Lens
 import Data.Foldable
 import Data.Maybe
@@ -25,11 +25,12 @@ import Control.Applicative
 
 -- |Analyse a score, applying the melodic analysis rules
 analyse :: Score BasicNote -> [Result]
-analyse = analyseParts . splitPhrases . map zipper . splitVoices
+analyse = analyseParts . splitPhrases . map Z.fromList . monophonic . map (view notes) . map simultaneous . extractParts
   where
-    splitVoices = Prelude.concatMap separateVoices . extractParts
     splitPhrases = Prelude.concatMap (splitZipper disjoint)
-    disjoint t u = offset t < onset u || offset u < onset t
+    disjoint t u = view offset t < view onset u || view offset u < view onset t
+    monophonic = filter (not . hasChords)
+    hasChords = Prelude.any (\n -> lengthOf pitches n > 1)
     analyseParts ps = catMaybes $ Prelude.concat $ mapPairs <$> rules <*> ps
     rules = [ruleH89, ruleH90, ruleH91, ruleH92]
 
@@ -60,7 +61,7 @@ ruleH90 z
                | otherwise                       = Just $ Error [part] s (Harmony 90) $ "Unresolved Diminished " ++ show i
       isResolution a1 a2 a = (==) p (if p2 > p1 then p2 .-^ m2 else p2 .+^ m2) -- Resolution to a diminished is a semitone in each side
         where
-          [p1, p2, p] = fmap __getPitch [a1, a2, a]
+          [p1, p2, p] = fmap getPitch [a1, a2, a]
 
 -- Analysis of Music according to Section 91 in Prouts Harmony
 -- An augmented interval is always bad (except augmented second)
@@ -89,10 +90,13 @@ ruleH92 z
 
 type ANote = (Note BasicNote)
 
+getPitch :: ANote -> M.Pitch
+getPitch x = (! 0) $ x ^?! pitches
+
 isOutInterval :: ANote -> ANote -> ANote -> Bool
 isOutInterval a1 a2 a = p <= min p1 p2 || p >= max p1 p2
   where
-    [p1, p2, p] = fmap __getPitch [a1, a2, a]
+    [p1, p2, p] = fmap getPitch [a1, a2, a]
 
 getNotes :: Z.Zipper ANote -> (Maybe ANote, ANote, ANote, Maybe ANote)
 getNotes z = (l2, l, r, r2)
@@ -102,16 +106,13 @@ getNotes z = (l2, l, r, r2)
         r = Z.cursor $ Z.right z
         r2 = Z.safeCursor $ Z.right $ Z.right z
 
-getBasicInfo :: Z.Zipper ANote -> (Interval BasicPitch, BasicPart, Span)
+getBasicInfo :: Z.Zipper ANote -> (M.Interval, BasicPart, Span)
 getBasicInfo z = (i, part, s)
   where
     (_, l, r, _) = getNotes z
-    i = __getPitch r .-. __getPitch l
-    part = getPart $ getNoteValue r
-    s = onset l <-> offset r
-
-zipper :: Score BasicNote -> Z.Zipper ANote
-zipper = Z.fromList . toList . mapWithSpan (=:)
+    i = getPitch r .-. getPitch l
+    part = view part' r
+    s = view onset l <-> view offset r
 
 splitZipper :: (a -> a -> Bool) -> Z.Zipper a -> [Z.Zipper a]
 splitZipper p z@(Z.Zip ls rs)
@@ -123,8 +124,3 @@ mapPairs :: (Z.Zipper a -> b) -> Z.Zipper a -> [b]
 mapPairs f = Z.foldrz foldit []
   where
     foldit z rs = if Z.endp $ Z.right z then rs else f z : rs
-
-instance HasGetPitch (ChordT BasicPitch) where
-    __getPitch c = case getChord c of
-      (p:[]) -> p
-      otherwise -> error "Chords not supported for melodic analysis"
