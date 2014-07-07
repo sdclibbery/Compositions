@@ -24,13 +24,10 @@ import Analysis.Result
 import Control.Applicative
 
 -- |Analyse a score, applying the melodic analysis rules
+-- |Any parts with chords in are discarded. All parts must be monophonic if they are to be analysed.
 analyse :: Score BasicNote -> [Result]
-analyse = analyseParts . splitPhrases . map Z.fromList . monophonic . map (view notes) . map simultaneous . extractParts
+analyse = analyseParts . phraseZippers
   where
-    splitPhrases = Prelude.concatMap (splitZipper disjoint)
-    disjoint t u = view offset t < view onset u || view offset u < view onset t
-    monophonic = filter (not . hasChords)
-    hasChords = Prelude.any (\n -> lengthOf pitches n > 1)
     analyseParts ps = catMaybes $ Prelude.concat $ mapPairs <$> rules <*> ps
     rules = [ruleH89, ruleH90, ruleH91, ruleH92]
 
@@ -56,7 +53,7 @@ ruleH90 z
       (i, part, s) = getBasicInfo z
       (l2, l, r, r2) = getNotes z
       evaluate | isNothing r2                    = Just $ Warning [part] s (Harmony 90) $ "Diminished " ++ show i
-               | isOutInterval l r (fromJust r2) = Just $ Error [part] s (Harmony 90) $ "Outside Diminished " ++ show i
+               | isOutsideInterval l r (fromJust r2) = Just $ Error [part] s (Harmony 90) $ "Outside Diminished " ++ show i
                | isResolution l r (fromJust r2)  = Nothing
                | otherwise                       = Just $ Error [part] s (Harmony 90) $ "Unresolved Diminished " ++ show i
       isResolution a1 a2 a = (==) p (if p2 > p1 then p2 .-^ m2 else p2 .+^ m2) -- Resolution to a diminished is a semitone in each side
@@ -78,8 +75,8 @@ ruleH91 z
 ruleH92 :: Z.Zipper ANote -> Maybe Result
 ruleH92 z
   | not isLarge                                  = Nothing
-  | isJust l2 && isOutInterval l r (fromJust l2) = Just $ Error [part] s (Harmony 92) "Large Interval Approach"
-  | isJust r2 && isOutInterval l r (fromJust r2) = Just $ Error [part] s (Harmony 92) "Large Interval Leave"
+  | isJust l2 && isOutsideInterval l r (fromJust l2) = Just $ Error [part] s (Harmony 92) "Large Interval Approach"
+  | isJust r2 && isOutsideInterval l r (fromJust r2) = Just $ Error [part] s (Harmony 92) "Large Interval Leave"
   | otherwise                                    = Nothing
     where
       (i, part, s) = getBasicInfo z
@@ -93,8 +90,8 @@ type ANote = (Note BasicNote)
 getPitch :: ANote -> M.Pitch
 getPitch x = (! 0) $ x ^?! pitches
 
-isOutInterval :: ANote -> ANote -> ANote -> Bool
-isOutInterval a1 a2 a = p <= min p1 p2 || p >= max p1 p2
+isOutsideInterval :: ANote -> ANote -> ANote -> Bool
+isOutsideInterval a1 a2 a = p <= min p1 p2 || p >= max p1 p2
   where
     [p1, p2, p] = fmap getPitch [a1, a2, a]
 
@@ -113,6 +110,14 @@ getBasicInfo z = (i, part, s)
     i = getPitch r .-. getPitch l
     part = view part' r
     s = view onset l <-> view offset r
+
+phraseZippers :: Score BasicNote -> [Z.Zipper ANote]
+phraseZippers = splitPhrases . map Z.fromList . monophonic . map (view notes . simultaneous) . extractParts
+  where
+    splitPhrases = Prelude.concatMap (splitZipper disjoint)
+    disjoint t u = view offset t < view onset u || view offset u < view onset t
+    monophonic = filter (not . hasChords)
+    hasChords = Prelude.any (\n -> lengthOf pitches n > 1)
 
 splitZipper :: (a -> a -> Bool) -> Z.Zipper a -> [Z.Zipper a]
 splitZipper p z@(Z.Zip ls rs)
