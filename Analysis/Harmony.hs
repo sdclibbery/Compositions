@@ -23,8 +23,11 @@ import Analysis.Result
 import Control.Applicative
 
 
--- ??How much gubbins in here (or Melody?) can be replaced by 'phrases' and 'mvoices'??
+-- ??How much gubbins in here (or Melody?) can be replaced by 'phrases' and/or 'mvoices'??
+ -- Would need to use AFTER extract parts
+ -- The question will be, can we still get the part and span info after using phrases/voices..??
 -- Current datastructure is (see HarmonyZipper) rests are (Note Nothings), and we have an 'event' zipper containing part zippers...
+ -- Does this make sense? Do we want a top level zipper across the parts?
 -- Need to fill out the functions immediately below
  -- harmonyZipper needs to wrap the part zippers into a harmony zipper
  -- analyseParts will need to find all combinations of parts in the HarmonyZipper and call each rule on each

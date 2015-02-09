@@ -1,14 +1,13 @@
 import Test.HUnit
 import qualified Analysis.MelodyTests
+import qualified Analysis.HarmonyTests
 
 {- TODO:
-x Try updating to new version of Music Suite
-* Experiment with writing lenses for the analysis rules...
- * Also look at 'withContext' as another possible alternative
-* Investigate Zippers that can step up and down through parts as well as along melodies
 * Harmony tests
+ * Section 96: consecutive unisons
 -}
 
 main = runTestTT $ TestList
         [ Analysis.MelodyTests.tests
+        , Analysis.HarmonyTests.tests
         ]
