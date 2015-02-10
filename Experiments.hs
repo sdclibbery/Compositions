@@ -39,8 +39,18 @@ voiceLead :: [Vertical] -> [Vertical]
 voiceLead vs = vs
 
 
+
+-- Consider Structure representation; want to be able to ask questions like:
+-- Get notes annotated with time, part etc
+-- Get next/prev note in any part
+-- Get next/prev note in any part
+-- Get notes in all parts at current time
+-- Get next/prev notes in this and another part
+
+
 -- !New voice leading module...
 -- Sort out the analysis. Suggest we define new sets of clearer rules :-)
+
 
 -- !!! Suggested approach to analysis:
 --  Do whats good for composition: Give a music, and a potential note to add, and ask what errors/warnings would result
@@ -53,10 +63,11 @@ parts mustnt overlap
 avoid large leaps
 avoid unisons between parts
 never have consecutive octaves or fifths (including compounds)
-never more than three consecutive of any interval
+never more than four consecutive of any interval
 avoid going to perfect consonance by similar motion (hidden octaves)
 -}
 
+---
 -- NotesToParts should reassign notes to parts, transposing up or down by octaves as needed, to achieve good voice leading and part writing
 --   Start by transposing the bass to be as close to the previous note as possible
 -- Experiment with arpeggiation
