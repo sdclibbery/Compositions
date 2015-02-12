@@ -9,6 +9,7 @@ import Keys
 import Chord
 import Numeral
 import Numerals
+import VoiceLeading
 import Data.Ratio
 import Data.List
 import Data.Ord

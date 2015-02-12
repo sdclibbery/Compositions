@@ -37,6 +37,18 @@ data Part = Part { name :: PartName, events :: [Event] } deriving (Eq, Show)
 -- |Entire music made up of a list of parts in order from bass to treble
 data Music = Music [Part] deriving (Eq, Show)
 
+
+-- |Make a music from lists of events. Each list of events is assigned a default part name
+music :: [[Event]] -> Music
+music ess
+  | length ess == 1 = Music $ map makePart $ zip [Bass] ess
+  | length ess == 2 = Music $ map makePart $ zip [Bass, Treble] ess
+  | length ess == 3 = Music $ map makePart $ zip [Bass, Alto, Treble] ess
+  | length ess == 4 = Music $ map makePart $ zip [Bass, Tenor, Alto, Treble] ess
+  where
+    makePart (n, es) = Part n es
+
+
 -- |Lengthen a note or rest by a given multiplier. Eg .>2 doubles the events duration.
 (.>) :: Event -> Integer -> Event
 (Play d n) .> i = Play (d * (i%1)) n
@@ -56,16 +68,6 @@ es .>> i = map (.> i) es
 (.<<) :: [Event] -> Integer -> [Event]
 es .<< i = map (.< i) es
 
-
--- |Make a music from lists of events. Each list of events is assigned a default part name
-music :: [[Event]] -> Music
-music ess
-  | length ess == 1 = Music $ map makePart $ zip [Bass] ess
-  | length ess == 2 = Music $ map makePart $ zip [Bass, Treble] ess
-  | length ess == 3 = Music $ map makePart $ zip [Bass, Alto, Treble] ess
-  | length ess == 4 = Music $ map makePart $ zip [Bass, Tenor, Alto, Treble] ess
-  where
-    makePart (n, es) = Part n es
 
 -- |Shorthand for rests
 rw = Rest (1)
