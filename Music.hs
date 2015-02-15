@@ -10,6 +10,7 @@ module Music (
   PartName(..),
   SeqEvent(..),
   Part(..),
+  emptyMusic,
   getParts,
   addEvent
 ) where
@@ -34,6 +35,12 @@ data Part = Part { name :: PartName, events :: [SeqEvent] } deriving (Eq, Show)
 
 -- |Entire music made up of a list of parts in order from bass to treble
 data Music = Music { bass :: Part, tenor :: Part, alto :: Part, soprano :: Part } deriving (Eq, Show)
+
+-- |Empty music with empty parts
+emptyMusic :: Music
+emptyMusic = Music (empty Bass) (empty Tenor) (empty Alto) (empty Soprano)
+  where
+    empty p = Part p []
 
 -- |Get a list with all the inhabited parts
 getParts :: Music -> [Part]

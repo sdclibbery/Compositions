@@ -55,7 +55,7 @@ voiceLead vs = vs
 -- x getParts to retrieve parts from a Music
 -- 
 -- x addEvent function to add an event to a part
--- Used by music function
+-- x Used by music function
 -- 
 -- Event contains full context: PartName, start/end times, higher/lower parts at start time, earlier/later events in same part
 -- 

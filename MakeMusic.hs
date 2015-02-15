@@ -20,15 +20,14 @@ import Data.Ratio
 
 -- |Make a music from lists of events. Each list of events is assigned a default part name
 music :: [[SeqEvent]] -> Music
-music ess
-  | length ess == 1 = Music (makePart Bass 0) (empty Tenor) (empty Alto) (empty Soprano)
-  | length ess == 2 = Music (makePart Bass 0) (empty Tenor) (empty Alto) (makePart Bass 1)
-  | length ess == 3 = Music (makePart Bass 0) (empty Tenor) (makePart Alto 1) (makePart Bass 2)
-  | length ess == 4 = Music (makePart Bass 0) (makePart Tenor 1) (makePart Alto 2) (makePart Bass 3)
+music ess = foldr (\(pn, es) m -> addPart m pn es) emptyMusic $ annotate ess
   where
-    makePart p i = Part p (ess!!i)
-    empty p = Part p []
-
+    addPart m pn es = foldr (\e m -> addEvent m pn e) m es
+    annotate ess
+      | length ess == 1 = [(Bass, ess!!0)]
+      | length ess == 2 = [(Bass, ess!!0), (Soprano, ess!!1)]
+      | length ess == 3 = [(Bass, ess!!0), (Alto, ess!!1), (Soprano, ess!!2)]
+      | length ess == 4 = [(Bass, ess!!0), (Tenor, ess!!1), (Alto, ess!!2), (Soprano, ess!!3)]
 
 -- |Lengthen a note or rest by a given multiplier. Eg .>2 doubles the SeqEvents duration.
 (.>) :: SeqEvent -> Integer -> SeqEvent
