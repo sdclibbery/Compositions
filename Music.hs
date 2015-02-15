@@ -22,7 +22,7 @@ type Time = Rational
 type Duration = Rational
 
 -- |Part name
-data PartName = Bass | Tenor | Alto | Treble deriving (Eq, Show)
+data PartName = Bass | Tenor | Alto | Soprano deriving (Eq, Show)
 
 -- |One note or rest in a part
 data SeqEvent = Rest Duration | Play Duration Note deriving (Eq, Show)

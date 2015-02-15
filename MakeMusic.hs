@@ -22,9 +22,9 @@ import Data.Ratio
 music :: [[SeqEvent]] -> Music
 music ess
   | length ess == 1 = Music $ map makePart $ zip [Bass] ess
-  | length ess == 2 = Music $ map makePart $ zip [Bass, Treble] ess
-  | length ess == 3 = Music $ map makePart $ zip [Bass, Alto, Treble] ess
-  | length ess == 4 = Music $ map makePart $ zip [Bass, Tenor, Alto, Treble] ess
+  | length ess == 2 = Music $ map makePart $ zip [Bass, Soprano] ess
+  | length ess == 3 = Music $ map makePart $ zip [Bass, Alto, Soprano] ess
+  | length ess == 4 = Music $ map makePart $ zip [Bass, Tenor, Alto, Soprano] ess
   where
     makePart (n, es) = Part n es
 
