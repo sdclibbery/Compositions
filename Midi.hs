@@ -15,10 +15,10 @@ import Note
 
 -- |Create a midi file representing the given Music
 createMidi :: FilePath -> Music -> IO()
-createMidi f (Music b t a s) = exportFile f $ Midi {
+createMidi f m = exportFile f $ Midi {
          fileType = MultiTrack, 
          timeDiv = TicksPerBeat ticksPerBeat, 
-         tracks = [makeTrack b, makeTrack t, makeTrack a, makeTrack s]
+         tracks = map makeTrack $ getParts m
        }
 
 
