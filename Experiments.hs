@@ -48,16 +48,19 @@ voiceLead vs = vs
 --
 -- x New Duration type distinct from Time: use for SeqEvent durations
 --
--- Rename Treble to Soprano
---
--- New Event type
--- Stored in Music instead of SeqEvent
+-- x Rename Treble to Soprano
+-- 
+-- Swap from list to parts to 4-tuple
+-- 
 -- addEvent function to add an event to a part
 --  Used by music function
 -- Event contains full context: PartName, start/end times, higher/lower parts at start time, earlier/later events in same part
 -- 
 -- getPartsAt function that gets Events in all parts at a given time
 -- Midi output navigates Events rather than pattern matching into Music itself
+-- 
+-- New Event type
+-- Stored in Music instead of SeqEvent
 -- 
 -- Analysis uses new Event etc
 -- 

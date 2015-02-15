@@ -10,6 +10,7 @@ module Music (
   PartName(..),
   SeqEvent(..),
   Part(..)
+--  addEvent
 ) where
 import Note
 import Data.List
@@ -31,5 +32,10 @@ data SeqEvent = Rest Duration | Play Duration Note deriving (Eq, Show)
 data Part = Part { name :: PartName, events :: [SeqEvent] } deriving (Eq, Show)
 
 -- |Entire music made up of a list of parts in order from bass to treble
-data Music = Music [Part] deriving (Eq, Show)
+data Music = Music { bass :: Part, tenor :: Part, alto :: Part, soprano :: Part } deriving (Eq, Show)
 
+{-
+-- |Add a new event to the end of a Part in some Music
+addEvent :: Music -> PartName -> SeqEvent -> Music
+addEvent ps p e = replacePart p ps $ addToPart e $ extractPart p ps
+-}

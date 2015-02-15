@@ -21,12 +21,13 @@ import Data.Ratio
 -- |Make a music from lists of events. Each list of events is assigned a default part name
 music :: [[SeqEvent]] -> Music
 music ess
-  | length ess == 1 = Music $ map makePart $ zip [Bass] ess
-  | length ess == 2 = Music $ map makePart $ zip [Bass, Soprano] ess
-  | length ess == 3 = Music $ map makePart $ zip [Bass, Alto, Soprano] ess
-  | length ess == 4 = Music $ map makePart $ zip [Bass, Tenor, Alto, Soprano] ess
+  | length ess == 1 = Music (makePart Bass 0) (empty Tenor) (empty Alto) (empty Soprano)
+  | length ess == 2 = Music (makePart Bass 0) (empty Tenor) (empty Alto) (makePart Bass 1)
+  | length ess == 3 = Music (makePart Bass 0) (empty Tenor) (makePart Alto 1) (makePart Bass 2)
+  | length ess == 4 = Music (makePart Bass 0) (makePart Tenor 1) (makePart Alto 2) (makePart Bass 3)
   where
-    makePart (n, es) = Part n es
+    makePart p i = Part p (ess!!i)
+    empty p = Part p []
 
 
 -- |Lengthen a note or rest by a given multiplier. Eg .>2 doubles the SeqEvents duration.
