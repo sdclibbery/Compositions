@@ -10,8 +10,8 @@ module Music (
   PartName(..),
   SeqEvent(..),
   Part(..),
-  getParts
---  addEvent
+  getParts,
+  addEvent
 ) where
 import Note
 import Data.List
@@ -39,8 +39,16 @@ data Music = Music { bass :: Part, tenor :: Part, alto :: Part, soprano :: Part 
 getParts :: Music -> [Part]
 getParts m = filter (not . null . events) [bass m, tenor m, alto m, soprano m]
 
-{-
 -- |Add a new event to the end of a Part in some Music
 addEvent :: Music -> PartName -> SeqEvent -> Music
-addEvent ps p e = replacePart p ps $ addToPart e $ extractPart p ps
--}
+addEvent m pn e = replacePart m pn $ addToPart e $ findPart m pn
+  where
+    findPart (Music b _ _ _) Bass = b
+    findPart (Music _ t _ _) Tenor = t
+    findPart (Music _ _ a _) Alto = a
+    findPart (Music _ _ _ s) Soprano = s
+    addToPart e (Part n es) = (Part n $ es++[e])
+    replacePart (Music b t a s) Bass p = Music p t a s
+    replacePart (Music b t a s) Tenor p = Music b p a s
+    replacePart (Music b t a s) Alto p = Music b t p s
+    replacePart (Music b t a s) Soprano p = Music b t a p

@@ -50,10 +50,13 @@ voiceLead vs = vs
 --
 -- x Rename Treble to Soprano
 -- 
--- Swap from list to parts to 4-tuple
+-- x Music to be explicit about the parts in it
+--
+-- x getParts to retrieve parts from a Music
 -- 
--- addEvent function to add an event to a part
---  Used by music function
+-- x addEvent function to add an event to a part
+-- Used by music function
+-- 
 -- Event contains full context: PartName, start/end times, higher/lower parts at start time, earlier/later events in same part
 -- 
 -- getPartsAt function that gets Events in all parts at a given time
