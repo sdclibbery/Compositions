@@ -1,4 +1,4 @@
-import Structure
+import Music
 import Note
 import Interval
 import Intervals
@@ -38,6 +38,33 @@ type Vertical = [Note]
 
 voiceLead :: [Vertical] -> [Vertical]
 voiceLead vs = vs
+
+
+-- ** Refactors
+-- Rename Structure module to Music
+--
+-- Rename Event to SeqEvent
+--
+-- New Duration type distinct from Time: use for SeqEvent durations
+--
+-- Rename Treble to Soprano
+--
+-- New Event type
+-- Stored in Music instead of SeqEvent
+-- addEvent function to add an event to a part
+--  Used by music function
+-- Event contains full context: PartName, start/end times, higher/lower parts at start time, earlier/later events in same part
+-- 
+-- getPartsAt function that gets Events in all parts at a given time
+-- Midi output navigates Events rather than pattern matching into Music itself
+-- 
+-- Analysis uses new Event etc
+-- 
+-- Hide Music internals
+-- 
+-- MakeMusic module does existing compose from sequence
+-- 
+
 
 
 

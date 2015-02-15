@@ -5,7 +5,7 @@ Description : Lists of note values
 
 module Notes where
 import Note
-import Structure
+import Music
 import Data.Ratio
 
 

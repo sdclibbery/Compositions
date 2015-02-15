@@ -9,7 +9,7 @@ module Midi (
 import Codec.Midi
 import Data.List
 import Data.Ratio
-import Structure
+import Music
 import Note
 
 
@@ -47,14 +47,14 @@ ticksPerBeat = 480
 beatsPerBar :: Int
 beatsPerBar = 4
 
-toTicks :: Structure.Time -> Ticks
+toTicks :: Music.Time -> Ticks
 toTicks t = truncate $ (fromIntegral $ ticksPerBeat * beatsPerBar) * (fromRational t)
 
 playEvent :: Event -> (Track Ticks)
 playEvent (Rest d) = [(toTicks d, NoteOff {channel = 0, key = 0, velocity = 0})] -- Bit hacky but it works; a resxt really delay the start of the following note
 playEvent (Play d n) = playnote (absChromatic n) d
 
-playnote :: Pitch -> Structure.Time -> Track Ticks
+playnote :: Pitch -> Music.Time -> Track Ticks
 playnote k d = [keydown k, keyup k]
   where
     keydown k = (0, NoteOn {channel = 0, key = k, velocity = 120})

@@ -1,4 +1,4 @@
-import Structure
+import Music
 import Note
 import Interval
 import Intervals

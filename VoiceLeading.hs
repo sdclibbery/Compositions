@@ -8,7 +8,7 @@ module VoiceLeading (
   Result(..),
   tryAddNote
 ) where
-import Structure
+import Music
 import Note
 import Interval
 import Notes
@@ -30,7 +30,7 @@ partRange p (Play _ n) = checkRange n $ range p
       range Bass   = (Note E Nat 2, Note E Nat 4)
 
 -- !! So. Need to find the notes from the OTHER voices which this one might cross...
--- Suggest adding the following to Structure:
+-- Suggest adding the following to Music:
 --  partDuration :: Music -> PartName
 --  noteAt :: Music -> PartName -> Time
 partsCrossing :: Music -> PartName -> Event -> Result

@@ -1,14 +1,14 @@
 {-|
-Module      : Structure
+Module      : Music
 Description : Definition of musical structure for use in harmonic analysis
 -}
 
-module Structure (
+module Music (
+  Music(..),
   Time(..),
   PartName(..),
   Event(..),
   Part(..),
-  Music(..),
   (.>),
   (.>>),
   (.<),
