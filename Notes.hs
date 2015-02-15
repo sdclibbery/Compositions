@@ -6,6 +6,7 @@ Description : Lists of note values
 module Notes where
 import Note
 import Music
+import MakeMusic
 import Data.Ratio
 
 

@@ -1,4 +1,5 @@
 import Music
+import MakeMusic
 import Note
 import Interval
 import Intervals

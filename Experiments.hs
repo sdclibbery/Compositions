@@ -1,4 +1,5 @@
 import Music
+import MakeMusic
 import Note
 import Interval
 import Intervals
@@ -41,7 +42,7 @@ voiceLead vs = vs
 
 
 -- ** Refactors
--- Rename Structure module to Music
+-- x Rename Structure module to Music
 --
 -- Rename Event to SeqEvent
 --
@@ -62,7 +63,7 @@ voiceLead vs = vs
 -- 
 -- Hide Music internals
 -- 
--- MakeMusic module does existing compose from sequence
+-- x MakeMusic module does existing compose from sequence
 -- 
 
 
