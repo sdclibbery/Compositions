@@ -44,9 +44,9 @@ voiceLead vs = vs
 -- ** Refactors
 -- x Rename Structure module to Music
 --
--- Rename Event to SeqEvent
+-- x Rename Event to SeqEvent
 --
--- New Duration type distinct from Time: use for SeqEvent durations
+-- x New Duration type distinct from Time: use for SeqEvent durations
 --
 -- Rename Treble to Soprano
 --
