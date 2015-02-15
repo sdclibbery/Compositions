@@ -24,7 +24,7 @@ progressionToChords = concatMap numeralsToChords
     numeralsToChords (k, ns) = map (numeralToChord k) ns
 
 
-type Parts = ([Event], [Event], [Event])
+type Parts = ([SeqEvent], [SeqEvent], [SeqEvent])
 
 concatParts :: Parts -> Parts -> Parts
 concatParts (b, t, tr) (b', t', tr') = (b++b', t++t', tr++tr')
@@ -124,7 +124,7 @@ coda = (
     [r.>2, f_, a_, c, f, c_, a_, c_, a_, f_, a_, f_, d_, f_, d_, r.>2, g, b, d', f', d', b, d', b, g, b, d, f, e, d].<<4 ++ [c'.>4]
   )
 
-notesToParts :: [Event] -> Parts
+notesToParts :: [SeqEvent] -> Parts
 notesToParts (ba:ns) = ([ba], [head ns], tail ns)
 
 arpeggiateParts :: Parts -> Parts

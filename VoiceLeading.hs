@@ -17,10 +17,10 @@ data Rule = PartRange | PartsCrossing deriving (Show, Eq)
 
 data Result = Ok | Error Rule | Warning Rule deriving (Show, Eq)
 
-tryAddNote :: Music -> PartName -> Event -> Result
+tryAddNote :: Music -> PartName -> SeqEvent -> Result
 tryAddNote m p e = partRange p e 
 
-partRange :: PartName -> Event -> Result
+partRange :: PartName -> SeqEvent -> Result
 partRange p (Play _ n) = checkRange n $ range p
     where
       checkRange n (lo, hi) = if n >= lo && n <= hi then Ok else Error PartRange
@@ -33,5 +33,5 @@ partRange p (Play _ n) = checkRange n $ range p
 -- Suggest adding the following to Music:
 --  partDuration :: Music -> PartName
 --  noteAt :: Music -> PartName -> Time
-partsCrossing :: Music -> PartName -> Event -> Result
+partsCrossing :: Music -> PartName -> SeqEvent -> Result
 partsCrossing m p (Play _ n) = Ok

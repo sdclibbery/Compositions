@@ -19,7 +19,7 @@ scale = [c, d, e, f, g, a, b, c', rw]
 
 fixOctave oo ns = map (\(Play t (Note d a o)) -> (Play t (Note d a (o+oo)))) ns
 
-returnToTonic :: Note -> [Event]
+returnToTonic :: Note -> [SeqEvent]
 returnToTonic (Note C Nat o) = [wn $ Note C Nat o] ++ [rw, rh]
 returnToTonic (Note D Nat o) = [wn $ Note D Nat o] ++ fixOctave (o-4) [c] ++ [rw, rh]
 returnToTonic (Note E Nat o) = [wn $ Note E Nat o] ++ fixOctave (o-4) [d,c] ++ [rw, rh]
@@ -28,7 +28,7 @@ returnToTonic (Note G Nat o) = [wn $ Note G Nat o] ++ fixOctave (o-4) [a,b,c'] +
 returnToTonic (Note A Nat o) = [wn $ Note A Nat o] ++ fixOctave (o-4) [b,c'] ++ [rw, rh]
 returnToTonic (Note B Nat o) = [wn $ Note B Nat o] ++ fixOctave (o-4) [c'] ++ [rw, rh]
 
-makeMusic :: Int -> [Note] -> [Event]
+makeMusic :: Int -> [Note] -> [SeqEvent]
 makeMusic i = concat . take num . insertEvery i scale . map returnToTonic
   where
     num = 35 *(min i 3)

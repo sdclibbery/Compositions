@@ -19,7 +19,7 @@ import Data.Ord
 import Data.Ratio
 
 -- |Make a music from lists of events. Each list of events is assigned a default part name
-music :: [[Event]] -> Music
+music :: [[SeqEvent]] -> Music
 music ess
   | length ess == 1 = Music $ map makePart $ zip [Bass] ess
   | length ess == 2 = Music $ map makePart $ zip [Bass, Treble] ess
@@ -29,23 +29,23 @@ music ess
     makePart (n, es) = Part n es
 
 
--- |Lengthen a note or rest by a given multiplier. Eg .>2 doubles the events duration.
-(.>) :: Event -> Integer -> Event
+-- |Lengthen a note or rest by a given multiplier. Eg .>2 doubles the SeqEvents duration.
+(.>) :: SeqEvent -> Integer -> SeqEvent
 (Play d n) .> i = Play (d * (i%1)) n
 (Rest d) .> i = Rest (d * (i%1))
 
--- |Lengthen a list of notes or rests by a given multiplier. Eg .>>2 doubles all the events duration.
-(.>>) :: [Event] -> Integer -> [Event]
+-- |Lengthen a list of notes or rests by a given multiplier. Eg .>>2 doubles all the SeqEvents duration.
+(.>>) :: [SeqEvent] -> Integer -> [SeqEvent]
 es .>> i = map (.> i) es
 
 
--- |Shorten a note or rest by a given multiplier. Eg .<2 halves the events duration.
-(.<) :: Event -> Integer -> Event
+-- |Shorten a note or rest by a given multiplier. Eg .<2 halves the SeqEvents duration.
+(.<) :: SeqEvent -> Integer -> SeqEvent
 (Play d n) .< i = Play (d * (1%i)) n
 (Rest d) .< i = Rest (d * (1%i))
 
--- |Shorten a list of notes or rests by a given multiplier. Eg .<<2 halves all the events duration.
-(.<<) :: [Event] -> Integer -> [Event]
+-- |Shorten a list of notes or rests by a given multiplier. Eg .<<2 halves all the SeqEvents duration.
+(.<<) :: [SeqEvent] -> Integer -> [SeqEvent]
 es .<< i = map (.< i) es
 
 
@@ -55,7 +55,7 @@ rh = Rest (1%2)
 r = Rest (1%4)
 re = Rest (1%8)
 
--- |Take a note and turn it into an event
+-- |Take a note and turn it into an SeqEvent
 wn = Play (1)
 hn = Play (1%2)
 qn = Play (1%4)

@@ -50,7 +50,7 @@ beatsPerBar = 4
 toTicks :: Music.Time -> Ticks
 toTicks t = truncate $ (fromIntegral $ ticksPerBeat * beatsPerBar) * (fromRational t)
 
-playEvent :: Event -> (Track Ticks)
+playEvent :: SeqEvent -> (Track Ticks)
 playEvent (Rest d) = [(toTicks d, NoteOff {channel = 0, key = 0, velocity = 0})] -- Bit hacky but it works; a resxt really delay the start of the following note
 playEvent (Play d n) = playnote (absChromatic n) d
 

@@ -7,7 +7,7 @@ module Music (
   Music(..),
   Time(..),
   PartName(..),
-  Event(..),
+  SeqEvent(..),
   Part(..)
 ) where
 import Note
@@ -21,10 +21,10 @@ type Time = Rational
 data PartName = Bass | Tenor | Alto | Treble deriving (Eq, Show)
 
 -- |One note or rest in a part
-data Event = Rest Time | Play Time Note deriving (Eq, Show)
+data SeqEvent = Rest Time | Play Time Note deriving (Eq, Show)
 
 -- |List of notes and rests in sequence
-data Part = Part { name :: PartName, events :: [Event] } deriving (Eq, Show)
+data Part = Part { name :: PartName, events :: [SeqEvent] } deriving (Eq, Show)
 
 -- |Entire music made up of a list of parts in order from bass to treble
 data Music = Music [Part] deriving (Eq, Show)
