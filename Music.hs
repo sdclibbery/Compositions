@@ -7,7 +7,7 @@ module Music (
   Music(..),
   Time(..),
   Duration(..),
-  PartName(..),
+  Part(..),
   SeqEvent(..),
   SeqPart(..),
   emptyMusic,
@@ -25,20 +25,20 @@ type Time = Rational
 type Duration = Rational
 
 -- |Part name
-data PartName = Bass | Tenor | Alto | Soprano deriving (Eq, Show)
+data Part = Bass | Tenor | Alto | Soprano deriving (Eq, Show)
 
 -- |One note or rest in a part
 data SeqEvent = Rest Duration | Play Duration Note deriving (Eq, Show)
 
 -- |List of notes and rests in sequence
-data SeqPart = SeqPart { name :: PartName, events :: [SeqEvent] } deriving (Eq, Show)
+data SeqPart = SeqPart { name :: Part, events :: [SeqEvent] } deriving (Eq, Show)
 
 -- |Entire music made up of a list of parts in order from bass to treble
 data Music = Music { bass :: SeqPart, tenor :: SeqPart, alto :: SeqPart, soprano :: SeqPart } deriving (Eq, Show)
 
 
 {-
-data Ctx = Ctx { start :: Time, end :: Time, part :: PartName, prev :: Event, next :: Event, lower :: Event, higher :: Event } deriving (Eq, Show)
+data Ctx = Ctx { start :: Time, end :: Time, part :: Part, prev :: Event, next :: Event, lower :: Event, higher :: Event } deriving (Eq, Show)
 
 data Event = Rest Ctx | Play Ctx Note deriving (Eq, Show)
 -}
@@ -55,7 +55,7 @@ getParts :: Music -> [SeqPart]
 getParts m = filter (not . null . events) [bass m, tenor m, alto m, soprano m]
 
 -- |Add a new event to the end of a Part in some Music
-addEvent :: Music -> PartName -> SeqEvent -> Music
+addEvent :: Music -> Part -> SeqEvent -> Music
 addEvent m pn e = replacePart m pn $ addToPart e $ findPart m pn
   where
     findPart (Music b _ _ _) Bass = b

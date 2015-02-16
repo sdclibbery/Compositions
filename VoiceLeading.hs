@@ -17,10 +17,10 @@ data Rule = PartRange | PartsCrossing deriving (Show, Eq)
 
 data Result = Ok | Error Rule | Warning Rule deriving (Show, Eq)
 
-tryAddNote :: Music -> PartName -> SeqEvent -> Result
+tryAddNote :: Music -> Part -> SeqEvent -> Result
 tryAddNote m p e = partRange p e 
 
-partRange :: PartName -> SeqEvent -> Result
+partRange :: Part -> SeqEvent -> Result
 partRange p (Play _ n) = checkRange n $ range p
     where
       checkRange n (lo, hi) = if n >= lo && n <= hi then Ok else Error PartRange
@@ -31,7 +31,7 @@ partRange p (Play _ n) = checkRange n $ range p
 
 -- !! So. Need to find the notes from the OTHER voices which this one might cross...
 -- Suggest adding the following to Music:
---  partDuration :: Music -> PartName
---  noteAt :: Music -> PartName -> Time
-partsCrossing :: Music -> PartName -> SeqEvent -> Result
+--  partDuration :: Music -> Part
+--  noteAt :: Music -> Part -> Time
+partsCrossing :: Music -> Part -> SeqEvent -> Result
 partsCrossing m p (Play _ n) = Ok
