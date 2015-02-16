@@ -57,13 +57,11 @@ voiceLead vs = vs
 -- x addEvent function to add an event to a part
 -- x Used by music function
 -- 
--- Event contains full context: PartName, start/end times, higher/lower parts at start time, earlier/later events in same part
--- 
--- getPartsAt function that gets Events in all parts at a given time
--- Midi output navigates Events rather than pattern matching into Music itself
--- 
 -- New Event type
 -- Stored in Music instead of SeqEvent
+-- Contains full context: PartName, start/end times, higher/lower parts at start time, earlier/later events in same part
+-- 
+-- ?? Do we need getParts at all?? can midi just start from the first event and go..?
 -- 
 -- Analysis uses new Event etc
 -- 

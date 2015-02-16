@@ -26,8 +26,8 @@ type Pitch = Int
 
 type MidiEvent = (Ticks, Message)
 
-makeTrack :: Part -> (Track Ticks)
-makeTrack (Part p es) = [
+makeTrack :: SeqPart -> (Track Ticks)
+makeTrack (SeqPart p es) = [
    (0,ChannelPrefix 0),
    (0,TrackName " Grand Piano  "),
    (0,InstrumentName "GM Device  1"),
