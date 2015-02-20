@@ -62,14 +62,18 @@ addEvent m p se = setPart m p $ addToPart se $ getPart m p
     addToPart se es = es++[toEvent es se]
     toEvent es (SeqRest d) = Rest (makeEventCtx es p d)
     toEvent es (SeqPlay d n) = Play (makeEventCtx es p d) n
-    getPart (Music b _ _ _) Bass = b
-    getPart (Music _ t _ _) Tenor = t
-    getPart (Music _ _ a _) Alto = a
-    getPart (Music _ _ _ s) Soprano = s
-    setPart (Music _ t a s) Bass p = Music p t a s
-    setPart (Music b _ a s) Tenor p = Music b p a s
-    setPart (Music b t _ s) Alto p = Music b t p s
-    setPart (Music b t a _) Soprano p = Music b t a p
+
+getPart :: Music -> Part -> [Event]
+getPart (Music b _ _ _) Bass = b
+getPart (Music _ t _ _) Tenor = t
+getPart (Music _ _ a _) Alto = a
+getPart (Music _ _ _ s) Soprano = s
+
+setPart :: Music -> Part -> [Event] -> Music
+setPart (Music _ t a s) Bass p = Music p t a s
+setPart (Music b _ a s) Tenor p = Music b p a s
+setPart (Music b t _ s) Alto p = Music b t p s
+setPart (Music b t a _) Soprano p = Music b t a p
 
 ctx :: Event -> Ctx
 ctx (Rest c) = c
