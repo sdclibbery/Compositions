@@ -17,7 +17,7 @@ import System.Random
 
 scale = [c, d, e, f, g, a, b, c', rw]
 
-fixOctave oo ns = map (\(Play t (Note d a o)) -> (Play t (Note d a (o+oo)))) ns
+fixOctave oo ns = map (\(SeqPlay t (Note d a o)) -> (SeqPlay t (Note d a (o+oo)))) ns
 
 returnToTonic :: Note -> [SeqEvent]
 returnToTonic (Note C Nat o) = [wn $ Note C Nat o] ++ [rw, rh]
@@ -39,7 +39,7 @@ earTraining name i es = do
   g <- newStdGen
   createMidi ("eartraining/et_"++name++".midi") $ music [part g ns ++ [rw]]
   where
-    ns = map (\(Play _ n) -> n) es
+    ns = map (\(SeqPlay _ n) -> n) es
     randomsChoice g xs = map (xs !!) $ randomRs (0, length xs - 1) g
     part g ns = makeMusic i $ randomsChoice g ns
 
