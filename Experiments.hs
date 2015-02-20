@@ -64,6 +64,8 @@ voiceLead vs = vs
 -- x Rename TmpRest and TmpPlay
 -- 
 -- Finish addEvent properly to knit new event into surrounding contexts properly
+--
+-- eventAt function
 -- 
 -- Analysis uses new Event etc
 -- 
