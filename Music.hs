@@ -57,19 +57,19 @@ getParts m = filter (not . null) [bass m, tenor m, alto m, soprano m]
 
 -- |Add a new event to the end of a Part in some Music
 addEvent :: Music -> Part -> SeqEvent -> Music
-addEvent m p se = replacePart m p $ addToPart se $ findPart m p
+addEvent m p se = setPart m p $ addToPart se $ getPart m p
   where
-    findPart (Music b _ _ _) Bass = b
-    findPart (Music _ t _ _) Tenor = t
-    findPart (Music _ _ a _) Alto = a
-    findPart (Music _ _ _ s) Soprano = s
     addToPart se es = es++[toEvent es se]
     toEvent es (SeqRest d) = Rest (makeEventCtx es p d)
     toEvent es (SeqPlay d n) = Play (makeEventCtx es p d) n
-    replacePart (Music b t a s) Bass p = Music p t a s
-    replacePart (Music b t a s) Tenor p = Music b p a s
-    replacePart (Music b t a s) Alto p = Music b t p s
-    replacePart (Music b t a s) Soprano p = Music b t a p
+    getPart (Music b _ _ _) Bass = b
+    getPart (Music _ t _ _) Tenor = t
+    getPart (Music _ _ a _) Alto = a
+    getPart (Music _ _ _ s) Soprano = s
+    setPart (Music _ t a s) Bass p = Music p t a s
+    setPart (Music b _ a s) Tenor p = Music b p a s
+    setPart (Music b t _ s) Alto p = Music b t p s
+    setPart (Music b t a _) Soprano p = Music b t a p
 
 ctx :: Event -> Ctx
 ctx (Rest c) = c
