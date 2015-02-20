@@ -60,10 +60,8 @@ voiceLead vs = vs
 -- New Event type
 -- x Stored in Music instead of SeqEvent
 -- x Midi uses
+-- x Rename TmpRest and TmpPlay
 -- Contains full context: PartName, start/end times, higher/lower parts at start time, earlier/later events in same part
--- 
--- Move SeqPart and SeqEvent to MakeMusic.hs
--- Rename TmpRest and TmpPlay
 -- 
 -- ?? Do we need getParts at all?? can midi just start from the first event and go..?
 -- 

@@ -51,8 +51,8 @@ toTicks :: Music.Time -> Ticks
 toTicks t = truncate $ (fromIntegral $ ticksPerBeat * beatsPerBar) * (fromRational t)
 
 playEvent :: Music.Event -> (Track Ticks)
-playEvent (TmpRest ctx) = [(toTicks (dur ctx), NoteOff {channel = 0, key = 0, velocity = 0})] -- Bit hacky but it works; a resxt really delay the start of the following note
-playEvent (TmpPlay ctx n) = playnote (absChromatic n) (dur ctx)
+playEvent (Rest ctx) = [(toTicks (dur ctx), NoteOff {channel = 0, key = 0, velocity = 0})] -- Bit hacky but it works; a resxt really delay the start of the following note
+playEvent (Play ctx n) = playnote (absChromatic n) (dur ctx)
 
 playnote :: Pitch -> Music.Time -> Track Ticks
 playnote k d = [keydown k, keyup k]

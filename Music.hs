@@ -41,7 +41,7 @@ data Part = Bass | Tenor | Alto | Soprano deriving (Eq, Show)
 data Ctx = Ctx { start :: Time, end :: Time, dur :: Duration, part :: Part, prev :: (Maybe Event), next :: (Maybe Event), lower :: (Maybe Event), higher :: (Maybe Event) } deriving (Eq, Show)
 
 -- |One music event; note or rest, and the surrounding musical context
-data Event = TmpRest Ctx | TmpPlay Ctx Note deriving (Eq, Show)
+data Event = Rest Ctx | Play Ctx Note deriving (Eq, Show)
 
 -- |Entire music made up of a list of parts in order from bass to treble
 data Music = Music { bass :: [Event], tenor :: [Event], alto :: [Event], soprano :: [Event] } deriving (Eq, Show)
@@ -64,16 +64,16 @@ addEvent m pn se = replacePart m pn $ addToPart se $ findPart m pn
     findPart (Music _ _ a _) Alto = a
     findPart (Music _ _ _ s) Soprano = s
     addToPart se es = es++[toEvent es se]
-    toEvent es (SeqRest d) = TmpRest (makeEventCtx es d)
-    toEvent es (SeqPlay d n) = TmpPlay (makeEventCtx es d) n
+    toEvent es (SeqRest d) = Rest (makeEventCtx es d)
+    toEvent es (SeqPlay d n) = Play (makeEventCtx es d) n
     replacePart (Music b t a s) Bass p = Music p t a s
     replacePart (Music b t a s) Tenor p = Music b p a s
     replacePart (Music b t a s) Alto p = Music b t p s
     replacePart (Music b t a s) Soprano p = Music b t a p
 
 ctx :: Event -> Ctx
-ctx (TmpRest c) = c
-ctx (TmpPlay c _) = c
+ctx (Rest c) = c
+ctx (Play c _) = c
 
 makeEventCtx :: [Event] -> Duration -> Ctx
 makeEventCtx es d = Ctx _start _end _dur _part _prev _next _higher _lower
