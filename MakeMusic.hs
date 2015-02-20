@@ -31,8 +31,8 @@ music ess = foldl' (\m (pn, es) -> addPart m pn es) emptyMusic $ annotate ess
 
 -- |Lengthen a note or rest by a given multiplier. Eg .>2 doubles the SeqEvents duration.
 (.>) :: SeqEvent -> Integer -> SeqEvent
-(Play d n) .> i = Play (d * (i%1)) n
-(Rest d) .> i = Rest (d * (i%1))
+(SeqPlay d n) .> i = SeqPlay (d * (i%1)) n
+(SeqRest d) .> i = SeqRest (d * (i%1))
 
 -- |Lengthen a list of notes or rests by a given multiplier. Eg .>>2 doubles all the SeqEvents duration.
 (.>>) :: [SeqEvent] -> Integer -> [SeqEvent]
@@ -41,8 +41,8 @@ es .>> i = map (.> i) es
 
 -- |Shorten a note or rest by a given multiplier. Eg .<2 halves the SeqEvents duration.
 (.<) :: SeqEvent -> Integer -> SeqEvent
-(Play d n) .< i = Play (d * (1%i)) n
-(Rest d) .< i = Rest (d * (1%i))
+(SeqPlay d n) .< i = SeqPlay (d * (1%i)) n
+(SeqRest d) .< i = SeqRest (d * (1%i))
 
 -- |Shorten a list of notes or rests by a given multiplier. Eg .<<2 halves all the SeqEvents duration.
 (.<<) :: [SeqEvent] -> Integer -> [SeqEvent]
@@ -50,14 +50,14 @@ es .<< i = map (.< i) es
 
 
 -- |Shorthand for rests
-rw = Rest (1)
-rh = Rest (1%2)
-r = Rest (1%4)
-re = Rest (1%8)
+rw = SeqRest (1)
+rh = SeqRest (1%2)
+r = SeqRest (1%4)
+re = SeqRest (1%8)
 
 -- |Take a note and turn it into an SeqEvent
-wn = Play (1)
-hn = Play (1%2)
-qn = Play (1%4)
-en = Play (1%8)
+wn = SeqPlay (1)
+hn = SeqPlay (1%2)
+qn = SeqPlay (1%4)
+en = SeqPlay (1%8)
 

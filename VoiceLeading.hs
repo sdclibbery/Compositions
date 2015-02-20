@@ -21,7 +21,7 @@ tryAddNote :: Music -> Part -> SeqEvent -> Result
 tryAddNote m p e = partRange p e 
 
 partRange :: Part -> SeqEvent -> Result
-partRange p (Play _ n) = checkRange n $ range p
+partRange p (SeqPlay _ n) = checkRange n $ range p
     where
       checkRange n (lo, hi) = if n >= lo && n <= hi then Ok else Error PartRange
       range Soprano = (Note C Nat 4, Note C Nat 6)
@@ -34,4 +34,4 @@ partRange p (Play _ n) = checkRange n $ range p
 --  partDuration :: Music -> Part
 --  noteAt :: Music -> Part -> Time
 partsCrossing :: Music -> Part -> SeqEvent -> Result
-partsCrossing m p (Play _ n) = Ok
+partsCrossing m p (SeqPlay _ n) = Ok

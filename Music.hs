@@ -22,7 +22,7 @@ import Data.Ord
 
 
 -- |One note or rest in a part
-data SeqEvent = Rest Duration | Play Duration Note deriving (Eq, Show)
+data SeqEvent = SeqRest Duration | SeqPlay Duration Note deriving (Eq, Show)
 
 -- |List of notes and rests in sequence
 data SeqPart = SeqPart { name :: Part, events :: [SeqEvent] } deriving (Eq, Show)
@@ -64,8 +64,8 @@ addEvent m pn se = replacePart m pn $ addToPart se $ findPart m pn
     findPart (Music _ _ a _) Alto = a
     findPart (Music _ _ _ s) Soprano = s
     addToPart se es = es++[toEvent es se]
-    toEvent es (Rest d) = TmpRest (makeEventCtx es d)
-    toEvent es (Play d n) = TmpPlay (makeEventCtx es d) n
+    toEvent es (SeqRest d) = TmpRest (makeEventCtx es d)
+    toEvent es (SeqPlay d n) = TmpPlay (makeEventCtx es d) n
     replacePart (Music b t a s) Bass p = Music p t a s
     replacePart (Music b t a s) Tenor p = Music b p a s
     replacePart (Music b t a s) Alto p = Music b t p s
