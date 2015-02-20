@@ -21,13 +21,6 @@ import Data.List
 import Data.Ord
 
 
--- |One note or rest in a part
-data SeqEvent = SeqRest Duration | SeqPlay Duration Note deriving (Eq, Show)
-
--- |List of notes and rests in sequence
-data SeqPart = SeqPart { name :: Part, events :: [SeqEvent] } deriving (Eq, Show)
-
-
 -- |Time type
 type Time = Rational
 
@@ -47,6 +40,13 @@ data Event = Rest Ctx | Play Ctx Note deriving (Eq, Show)
 data Music = Music { bass :: [Event], tenor :: [Event], alto :: [Event], soprano :: [Event] } deriving (Eq, Show)
 
 
+-- |One note or rest in a sequence (used for constructing music)
+data SeqEvent = SeqRest Duration | SeqPlay Duration Note deriving (Eq, Show)
+
+-- |List of notes and rests in sequence (used for constructing music)
+data SeqPart = SeqPart { name :: Part, events :: [SeqEvent] } deriving (Eq, Show)
+
+
 -- |Empty music with empty parts
 emptyMusic :: Music
 emptyMusic = Music [] [] [] []
@@ -57,15 +57,15 @@ getParts m = filter (not . null) [bass m, tenor m, alto m, soprano m]
 
 -- |Add a new event to the end of a Part in some Music
 addEvent :: Music -> Part -> SeqEvent -> Music
-addEvent m pn se = replacePart m pn $ addToPart se $ findPart m pn
+addEvent m p se = replacePart m p $ addToPart se $ findPart m p
   where
     findPart (Music b _ _ _) Bass = b
     findPart (Music _ t _ _) Tenor = t
     findPart (Music _ _ a _) Alto = a
     findPart (Music _ _ _ s) Soprano = s
     addToPart se es = es++[toEvent es se]
-    toEvent es (SeqRest d) = Rest (makeEventCtx es d)
-    toEvent es (SeqPlay d n) = Play (makeEventCtx es d) n
+    toEvent es (SeqRest d) = Rest (makeEventCtx es p d)
+    toEvent es (SeqPlay d n) = Play (makeEventCtx es p d) n
     replacePart (Music b t a s) Bass p = Music p t a s
     replacePart (Music b t a s) Tenor p = Music b p a s
     replacePart (Music b t a s) Alto p = Music b t p s
@@ -75,13 +75,13 @@ ctx :: Event -> Ctx
 ctx (Rest c) = c
 ctx (Play c _) = c
 
-makeEventCtx :: [Event] -> Duration -> Ctx
-makeEventCtx es d = Ctx _start _end _dur _part _prev _next _higher _lower
+makeEventCtx :: [Event] -> Part -> Duration -> Ctx
+makeEventCtx es p d = Ctx _start _end _dur _part _prev _next _higher _lower
   where
     _start = if null es then 0 else end $ ctx $ last es
     _end = _start + d
     _dur = _end - _start
-    _part = part $ ctx $ head es
+    _part = p
     _prev = Just $ last es
     _next = Nothing
     _higher = Nothing -- !!! TODO!!!

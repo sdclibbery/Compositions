@@ -63,14 +63,14 @@ voiceLead vs = vs
 -- x Midi uses it
 -- x Rename TmpRest and TmpPlay
 -- 
--- ?? Do we need getParts at all?? can midi just start from the first event and go..?
---
 -- Finish addEvent properly to knit new event into surrounding contexts properly
 -- 
 -- Analysis uses new Event etc
 -- 
 -- Hide Music internals
 -- 
+-- ?? Do we need getParts at all?? can midi just start from the first event and go..?
+--
 -- x MakeMusic module does existing compose from sequence
 
 
