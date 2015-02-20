@@ -58,8 +58,12 @@ voiceLead vs = vs
 -- x Used by music function
 -- 
 -- New Event type
--- Stored in Music instead of SeqEvent
+-- x Stored in Music instead of SeqEvent
+-- x Midi uses
 -- Contains full context: PartName, start/end times, higher/lower parts at start time, earlier/later events in same part
+-- 
+-- Move SeqPart and SeqEvent to MakeMusic.hs
+-- Rename TmpRest and TmpPlay
 -- 
 -- ?? Do we need getParts at all?? can midi just start from the first event and go..?
 -- 
@@ -68,7 +72,6 @@ voiceLead vs = vs
 -- Hide Music internals
 -- 
 -- x MakeMusic module does existing compose from sequence
--- 
 
 
 

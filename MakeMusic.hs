@@ -20,9 +20,9 @@ import Data.Ratio
 
 -- |Make a music from lists of events. Each list of events is assigned a default part name
 music :: [[SeqEvent]] -> Music
-music ess = foldr (\(pn, es) m -> addPart m pn es) emptyMusic $ annotate ess
+music ess = foldl' (\m (pn, es) -> addPart m pn es) emptyMusic $ annotate ess
   where
-    addPart m pn es = foldr (\e m -> addEvent m pn e) m es
+    addPart m pn es = foldl' (\m e -> addEvent m pn e) m es
     annotate ess
       | length ess == 1 = [(Bass, ess!!0)]
       | length ess == 2 = [(Bass, ess!!0), (Soprano, ess!!1)]

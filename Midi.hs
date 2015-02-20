@@ -26,8 +26,8 @@ type Pitch = Int
 
 type MidiEvent = (Ticks, Message)
 
-makeTrack :: SeqPart -> (Track Ticks)
-makeTrack (SeqPart p es) = [
+makeTrack :: [Music.Event] -> (Track Ticks)
+makeTrack es = [
    (0,ChannelPrefix 0),
    (0,TrackName " Grand Piano  "),
    (0,InstrumentName "GM Device  1"),
@@ -50,9 +50,9 @@ beatsPerBar = 4
 toTicks :: Music.Time -> Ticks
 toTicks t = truncate $ (fromIntegral $ ticksPerBeat * beatsPerBar) * (fromRational t)
 
-playEvent :: SeqEvent -> (Track Ticks)
-playEvent (Rest d) = [(toTicks d, NoteOff {channel = 0, key = 0, velocity = 0})] -- Bit hacky but it works; a resxt really delay the start of the following note
-playEvent (Play d n) = playnote (absChromatic n) d
+playEvent :: Music.Event -> (Track Ticks)
+playEvent (TmpRest ctx) = [(toTicks (dur ctx), NoteOff {channel = 0, key = 0, velocity = 0})] -- Bit hacky but it works; a resxt really delay the start of the following note
+playEvent (TmpPlay ctx n) = playnote (absChromatic n) (dur ctx)
 
 playnote :: Pitch -> Music.Time -> Track Ticks
 playnote k d = [keydown k, keyup k]
