@@ -31,7 +31,7 @@ type Duration = Rational
 data Part = Bass | Tenor | Alto | Soprano deriving (Eq, Show)
 
 -- |Context for a music event
-data Ctx = Ctx { start :: Time, end :: Time, dur :: Duration, part :: Part, prev :: (Maybe Event), next :: (Maybe Event), lower :: (Maybe Part), higher :: (Maybe Part) } deriving (Eq, Show)
+data Ctx = Ctx { start :: Time, end :: Time, dur :: Duration, part :: Part, prev :: [Event], next :: [Event], lower :: (Maybe Part), higher :: (Maybe Part) } deriving (Eq, Show)
 
 -- |One music event; note or rest, and the surrounding musical context
 data Event = Rest Ctx | Play Ctx Note deriving (Eq, Show)
@@ -62,6 +62,7 @@ addEvent m p se = setPart m p $ addToPart se $ getPart m p
     addToPart se es = es++[toEvent es se]
     toEvent es (SeqRest d) = Rest (makeEventCtx es p d)
     toEvent es (SeqPlay d n) = Play (makeEventCtx es p d) n
+    -- !!! Need to link in to all neighbours as well!!
 
 getPart :: Music -> Part -> [Event]
 getPart (Music b _ _ _) Bass = b
@@ -86,11 +87,10 @@ makeEventCtx es p d = Ctx _start _end _dur _part _prev _next _higher _lower
     _end = _start + d
     _dur = _end - _start
     _part = p
-    _prev = Just $ last es
-    _next = Nothing
+    _prev = reverse es
+    _next = []
     _higher = higherPart p
     _lower = lowerPart p
-    -- !!! Need to link in to all neighbours as well!!
 
 higherPart :: Part -> Maybe Part
 higherPart Bass = Just Tenor
