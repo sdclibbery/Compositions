@@ -74,19 +74,11 @@ lowerPart Soprano = Just Alto
 
 -- |Get the event occuring immediately before a given time (if there is one)
 getEventBefore :: Music -> Part -> Time -> Maybe Event
-getEventBefore m p t = findEventBefore (getPart m p) t
-  where
-    findEventBefore z t | endp z = Nothing
-    findEventBefore z t | (Music.start $ ctx $ cursor z) < t = Just $ cursor z
-    findEventBefore z t = findEventBefore (right z) t
+getEventBefore m p t = findFirstEvent (getPart m p) ((< t).(Music.start).ctx)
 
 -- |Get the event occuring immediately after a given time (if there is one)
 getEventAfter :: Music -> Part -> Time -> Maybe Event
-getEventAfter m p t = findEventAfter (getPart m p) t
-  where
-    findEventAfter z t | endp z = Nothing
-    findEventAfter z t | (Music.start $ ctx $ cursor z) <= t = Just $ cursor z
-    findEventAfter z t = findEventAfter (right z) t
+getEventAfter m p t = findFirstEvent (getPart m p) ((<= t).(Music.start).ctx)
 
 -- |Add a new event to the end of a Part in some Music
 addEvent :: Music -> Part -> SeqEvent -> Music
@@ -124,3 +116,9 @@ partDuration :: Zipper Event -> Duration
 partDuration e = if null es then 0 else (Music.end) $ ctx $ last $ toList e
   where
     es = toList e
+
+findFirstEvent :: Zipper Event -> (Event -> Bool) -> Maybe Event
+findFirstEvent z _ | endp z = Nothing
+findFirstEvent z p | (p.cursor) z = Just $ cursor z
+findFirstEvent z p = findFirstEvent (right z) p
+
