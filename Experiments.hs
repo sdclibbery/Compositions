@@ -65,7 +65,7 @@ voiceLead vs = vs
 -- 
 -- x Finish addEvent properly to knit new event into surrounding contexts properly
 --
--- eventAt function
+-- geteventBefore/getEventAfter functions
 -- 
 -- Analysis uses new Event etc
 -- 

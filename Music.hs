@@ -13,10 +13,10 @@ module Music (
   Ctx(..),
   Event(..),
   emptyMusic,
-  higherPart,
-  lowerPart,
+  higherPart, lowerPart,
   getParts,
-  addEvent
+  getEventBefore, getEventAfter,
+  addEvent,
 ) where
 import Note
 import Data.List
@@ -71,6 +71,22 @@ lowerPart Bass = Nothing
 lowerPart Tenor = Just Bass
 lowerPart Alto = Just Tenor
 lowerPart Soprano = Just Alto
+
+-- |Get the event occuring immediately before a given time (if there is one)
+getEventBefore :: Music -> Part -> Time -> Maybe Event
+getEventBefore m p t = findEventBefore (getPart m p) t
+  where
+    findEventBefore z t | endp z = Nothing
+    findEventBefore z t | (Music.start $ ctx $ cursor z) < t = Just $ cursor z
+    findEventBefore z t = findEventBefore (right z) t
+
+-- |Get the event occuring immediately after a given time (if there is one)
+getEventAfter :: Music -> Part -> Time -> Maybe Event
+getEventAfter m p t = findEventAfter (getPart m p) t
+  where
+    findEventAfter z t | endp z = Nothing
+    findEventAfter z t | (Music.start $ ctx $ cursor z) <= t = Just $ cursor z
+    findEventAfter z t = findEventAfter (right z) t
 
 -- |Add a new event to the end of a Part in some Music
 addEvent :: Music -> Part -> SeqEvent -> Music
