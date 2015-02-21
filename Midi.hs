@@ -27,7 +27,7 @@ type Pitch = Int
 type MidiEvent = (Ticks, Message)
 
 makeTrack :: [Music.Event] -> (Track Ticks)
-makeTrack es = [
+makeTrack e = [
    (0,ChannelPrefix 0),
    (0,TrackName " Grand Piano  "),
    (0,InstrumentName "GM Device  1"),
@@ -35,7 +35,7 @@ makeTrack es = [
    (0,KeySignature 0 0)
   ]
   ++
-  concatMap playEvent es
+  concatMap playEvent e
   ++
   [
    (1000,TrackEnd)

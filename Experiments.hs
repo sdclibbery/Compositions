@@ -63,7 +63,7 @@ voiceLead vs = vs
 -- x Midi uses it
 -- x Rename TmpRest and TmpPlay
 -- 
--- Finish addEvent properly to knit new event into surrounding contexts properly
+-- x Finish addEvent properly to knit new event into surrounding contexts properly
 --
 -- eventAt function
 -- 
