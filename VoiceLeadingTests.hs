@@ -1,7 +1,8 @@
 import Test.HUnit
 import VoiceLeading
 import Notes
-import Structure
+import Music
+import MakeMusic
 
 main = runTestTT $ TestList
   [
@@ -19,18 +20,18 @@ main = runTestTT $ TestList
 
 
 partRange = TestList [
-  test Ok                 Treble g,
-  test (Error PartRange)  Treble c__,
-  test (Error PartRange)  Treble b'',
-  test (Error PartRange)  Bass g
+  test []                 Soprano g,
+  test [Error PartRange]  Soprano c__,
+  test [Error PartRange]  Soprano b'',
+  test [Error PartRange]  Bass g
   ] where
     test e p s = (show s ++ show p) ~: e ~=? tryAddNote m p s
     m = music [ [c_], [g_], [c], [e] ]
 
 partsCrossing = TestList [
-  test Ok                     Alto c,
-  test (Error PartsCrossing)  Alto g,
-  test (Error PartsCrossing)  Alto g_
+  test []                     Alto c,
+  test [Error PartsCrossing]  Alto g,
+  test [Error PartsCrossing]  Alto g_
   ] where
     test e p s = (show s ++ show p) ~: e ~=? tryAddNote m p s
     m = music [ [c_], [a_, a_], [c], [e, e] ]
